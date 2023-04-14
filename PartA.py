@@ -1,5 +1,6 @@
 import re
 import time
+import sys
 #runtime complexity explanation linear? polynomial? exponential? 
 #[delete later] token: sequence of alphanumeric characters indepednent of
 #capitalization
@@ -23,11 +24,10 @@ def tokenize(TextFilePath):
     except FileNotFoundError as e:
         print("File not found")
 
-start_time = time.time()
-TextFilePath = "C:\\Users\\ailee\\Desktop\\in4matx 141\\testA.txt"
-tokenize(TextFilePath)
-stop_time = time.time() 
-print(stop_time-start_time)
+
+
+
+
 #Map<Token,Count> computeWordFrequencies(List,Token>)
 
 def computeWordFrequencies(token_list):
@@ -43,7 +43,7 @@ def computeWordFrequencies(token_list):
 
 
 
-#line 53 referred from https://stackoverflow.com/questions/4233476/sort-a-list-by-multiple-attributes
+#line 53 referenced from https://stackoverflow.com/questions/4233476/sort-a-list-by-multiple-attributes
 
 #print(map_token)
 #void print(Frequencies<Token,Count>)
@@ -54,5 +54,17 @@ def Frequencies(map_token):
     list_items.sort(key = lambda x: [x[1]], reverse = True)
     [print(f"{token[0]} - {token[1]}") for token in list_items]
 
-map_token = computeWordFrequencies(tokenize(TextFilePath))
-Frequencies(map_token)
+#line 61 referenced from https://stackoverflow.com/questions/1009860/how-can-i-read-and-process-parse-command-line-arguments
+def main():
+    start_time = time.time()
+
+    TextFilePath = sys.argv[1]
+    map_token = computeWordFrequencies(tokenize(TextFilePath))
+    Frequencies(map_token)
+
+    stop_time = time.time() 
+    print(f"time {stop_time-start_time}")
+
+if __name__ == "__main__":
+    main()
+
