@@ -42,10 +42,17 @@ def computeWordFrequencies(token_list):
     return map_token
 
 
-computeWordFrequencies(tokenize(TextFilePath))
+
+#line 53 referred from https://stackoverflow.com/questions/4233476/sort-a-list-by-multiple-attributes
+
 #print(map_token)
 #void print(Frequencies<Token,Count>)
-#def Frequencies(map_token):
-#    print(list(map_token))
+def Frequencies(map_token):
+    #print(map_token)
+    list_items = [ [key, value] for key, value in map_token.items()]
+    list_items.sort(key = lambda x: [x[0]])
+    list_items.sort(key = lambda x: [x[1]], reverse = True)
+    [print(f"{token[0]} - {token[1]}") for token in list_items]
 
-#print(Frequencies(map_token))
+map_token = computeWordFrequencies(tokenize(TextFilePath))
+Frequencies(map_token)
