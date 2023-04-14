@@ -19,7 +19,6 @@ def tokenize(TextFilePath):
                     else:
                         token.append(word)
         #setToken = {token}
-        print(token)
         return token
     except FileNotFoundError as e:
         print("File not found")
@@ -32,17 +31,18 @@ print(stop_time-start_time)
 #Map<Token,Count> computeWordFrequencies(List,Token>)
 
 def computeWordFrequencies(token_list):
+    token_list = [i.lower() for i in token_list]
     map_token = dict()
+    # map key, value
     for word in token_list:
         if word in map_token:
-            value = map_token(word)
-            map_token[word] = value+1 
+            map_token[word] = map_token.get(word) + 1
         else:
             map_token[word] = 1
     return map_token
 
 
-#map_token = computeWordFrequencies(tokenize(TextFilePath))
+computeWordFrequencies(tokenize(TextFilePath))
 #print(map_token)
 #void print(Frequencies<Token,Count>)
 #def Frequencies(map_token):
