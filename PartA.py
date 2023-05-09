@@ -43,6 +43,20 @@ def tokenize(TextFilePath: str) -> set:
             text_file.close()
     # under except, it will only happen at open and read phase, where at worse it will be constant
 
+def tokenizeHTMLString(HTMLString: str) -> set:
+    try:
+        
+        tokenized_text = set() # initiating is constant
+
+        for word in re.findall('[0-9]+|(?:[a-zA-Z0-9]{1,}[a-zA-Z0-9]+(?:\'s|\.d){0,1})', HTMLString.lower()):
+            tokenized_text.add(word.lower())
+
+        # update the words into a uniform style handles the independent of capitalization requirement
+        # this also takes O(n)
+        return tokenized_text  # constant
+    except:
+        print("error")
+    
 
 def tokenize_nonunique(TextFilePath: str) -> list:
     # Tokenizer but keeps multiple occurrences.

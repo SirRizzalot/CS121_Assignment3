@@ -11,7 +11,7 @@
 ######################################################################################################################
 import os
 import json
-from PartA import tokenize
+from PartA import tokenizeHTMLString
 import string
 from sys import argv
 
@@ -34,13 +34,13 @@ def file_parser(main_folder):
                with open(os.path.join(folder, file), "r") as f:
                   data = json.load(f)
                   # call function to add the url to a file
-                  unique_words = tokenize(data["content"])
+                  unique_words = tokenizeHTMLString(data["content"])
 
                   # hash the url
                   url_id = hash(data["url"])
                   # add the url to the id dictionary
                   url_ids[url_id] = data["url"]
-                  index = open("website_index.txt", "a")
+                  index = open("website_index.txt", "a+")
                   for word in unique_words:
                      if word not in word_locations:
                         word_locations[word] = line
@@ -50,13 +50,21 @@ def file_parser(main_folder):
                         current_line = 0
 
                         while current_line != word_locations[word]:
-                           current_line_info = index.readline()
+                           #current_line_info = index.readline()
                            current_line+=1
                         # need help putting urls with the same word into the same line.
                         # 1st idea is to add to the end of the line we find it with
                         # 2nd idea is to create a lot of text files each with a word then merge it at the end haha
-
-                  f.close()
+                        
+                        with open('website_index.txt', 'r+') as f: #r+ does the work of rw
+                           lines = f.readlines()
+                           lines[current_line - 1] = lines[current_line - 1].strip() + ", " + data["url"] + '\n'
+                           f.seek(0)
+                           for i in lines:
+                              f.write(i)
+               f.close()
+               
+               print(unique_words)
          except json.JSONDecodeError as e:
             print(f"File {file} is not a valid json file")
             continue
@@ -64,9 +72,5 @@ def file_parser(main_folder):
 
 
 
-
-
-
-
 if __name__ == "__main__":
-   file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/ANALYST")
+   file_parser("/Users/thyva.000/cs121/a3-m1/CS121_Assignment3/ANALYST")
