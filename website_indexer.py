@@ -13,7 +13,9 @@ import os
 import json
 from PartA import tokenizeHTMLString
 import string
+import linecache
 from sys import argv
+from itertools import islice
 
 
 def file_parser(main_folder):
@@ -50,26 +52,36 @@ def file_parser(main_folder):
                         current_line = 0
 
                         while current_line != word_locations[word]:
-                           #current_line_info = index.readline()
+                           #current_line_info = index.readline().strip()
                            current_line+=1
+                        
+                        current_line_info = linecache.getline(r"website_index.txt", current_line)
+                        print(word + ": " + str(current_line))
+                        print(current_line_info)
+                        #current_line_info = index.readline()
                         # need help putting urls with the same word into the same line.
                         # 1st idea is to add to the end of the line we find it with
                         # 2nd idea is to create a lot of text files each with a word then merge it at the end haha
                         
-                        with open('website_index.txt', 'r+') as f: #r+ does the work of rw
-                           lines = f.readlines()
-                           lines[current_line - 1] = lines[current_line - 1].strip() + ", " + data["url"] + '\n'
-                           f.seek(0)
-                           for i in lines:
-                              f.write(i)
+                        # with open('website_index.txt', 'r+') as f: #r+ does the work of rw
+                        #    lines = f.readlines()
+                        #    lines[current_line - 1] = lines[current_line - 1].strip() + ", " + data["url"] + '\n'
+                        #    f.seek(0)
+                        #    for i in lines:
+                        #       f.write(i)
+                        word_locations[word] = line
+                        print(data["url"])
+                        index.write(current_line_info.strip() + ", " + data["url"] + "\n")
+                        line += 1
+                        linecache.clearcache()
+                        
                f.close()
-               
-               print(unique_words)
+                  
          except json.JSONDecodeError as e:
             print(f"File {file} is not a valid json file")
             continue
 
-
+   print(word_locations)   
 
 
 if __name__ == "__main__":

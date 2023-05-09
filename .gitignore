@@ -6,6 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
+# Corpus folder
+ANALYST
+TEMP
+
 # Distribution / packaging
 .Python
 build/
