@@ -46,10 +46,10 @@ def tokenize(TextFilePath: str) -> set:
 def tokenizeHTMLString(HTMLString: str) -> set:
     try:
         
-        tokenized_text = set() # initiating is constant
+        tokenized_text = [] # initiating is constant
 
         for word in re.findall('[0-9]+|(?:[a-zA-Z0-9]{1,}[a-zA-Z0-9]+(?:\'s|\.d){0,1})', HTMLString.lower()):
-            tokenized_text.add(word.lower())
+            tokenized_text.append(word.lower())
 
         # update the words into a uniform style handles the independent of capitalization requirement
         # this also takes O(n)

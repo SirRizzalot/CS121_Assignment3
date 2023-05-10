@@ -11,7 +11,7 @@
 ######################################################################################################################
 import os
 import json
-from PartA import tokenizeHTMLString
+from PartA import tokenizeHTMLString, computeWordFrequencies
 import string
 import linecache
 from sys import argv
@@ -37,16 +37,18 @@ def file_parser(main_folder):
                   data = json.load(f)
                   # call function to add the url to a file
                   unique_words = tokenizeHTMLString(data["content"])
-
+                  frequencies = computeWordFrequencies(unique_words)
+                  
                   # hash the url
                   url_id = hash(data["url"])
                   # add the url to the id dictionary
                   url_ids[url_id] = data["url"]
                   index = open("website_index.txt", "a+")
-                  for word in unique_words:
+                  for word in frequencies:
                      if word not in word_locations:
                         word_locations[word] = line
-                        index.write(word + ":" + data["url"] + "\n")
+                        #index.write(word + ": " + data["url"] + "\n")
+                        index.write(f"{word} : {{{data['url']}, {frequencies[word]}}}\n")
                         line += 1
                      else:
                         current_line = 0
@@ -59,19 +61,14 @@ def file_parser(main_folder):
                         print(word + ": " + str(current_line))
                         print(current_line_info)
                         #current_line_info = index.readline()
-                        # need help putting urls with the same word into the same line.
+                        # putting urls with the same word into the same line.
                         # 1st idea is to add to the end of the line we find it with
                         # 2nd idea is to create a lot of text files each with a word then merge it at the end haha
                         
-                        # with open('website_index.txt', 'r+') as f: #r+ does the work of rw
-                        #    lines = f.readlines()
-                        #    lines[current_line - 1] = lines[current_line - 1].strip() + ", " + data["url"] + '\n'
-                        #    f.seek(0)
-                        #    for i in lines:
-                        #       f.write(i)
                         word_locations[word] = line
                         print(data["url"])
-                        index.write(current_line_info.strip() + ", " + data["url"] + "\n")
+                        index.write(f"{current_line_info.strip()}, {{{data['url']}, {frequencies[word]}}}\n")
+                        #index.write(f"{word} : ({data['url']}, {frequencies[word]})\n")
                         line += 1
                         linecache.clearcache()
                         
