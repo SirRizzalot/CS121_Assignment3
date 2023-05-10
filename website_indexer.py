@@ -125,7 +125,7 @@ def file_parser(main_folder):
                 print(f"File {file} is not a valid json file")
                 continue
     with open("website_index.txt", "w") as f:
-        for word, details in word_url.items():
+        for word, details in sorted(word_url.items()):
             f.write(f"{word}: ")
             for detail in details:
                 f.write(f"{{{detail[0]}, {detail[1]}}}, ")
