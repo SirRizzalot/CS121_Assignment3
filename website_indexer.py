@@ -19,6 +19,10 @@ import linecache
 from sys import argv
 from itertools import islice
 import time
+# import urllib3
+import urllib.request
+from bs4 import BeautifulSoup
+import sys
 
 start_time = time.time()
 
@@ -63,6 +67,8 @@ def file_parser(main_folder):
     word_url = defaultdict(list)
     url_no = 0
 
+    important_text = dict()
+
     # read the main folder and loop through all the sub folders
     for folder in os.listdir(main_folder):
         # merges the path
@@ -83,14 +89,30 @@ def file_parser(main_folder):
                         # add the url to the id dictionary
                         url_ids[url_no] = data["url"]
                         url_no += 1
-                        # index = open("website_index.txt", "a+")
+                        
+                        # getting important text from content
+                        soup = BeautifulSoup(data["content"], 'lxml')
+                        tags = ['b', 'strong', 'h1', 'h2', 'h3', 'title']
+                        text = [tag.text for tag in soup.find_all(tags)]
+                        
+                        # if(len(text) > 0):
+                        #     print(text)
+                        #     print(data["url"])
+                        #     sys.exit()
+                        
+                        for words in text:
+                            if words in important_text:
+                                important_text[words] += 1
+                            else:
+                                important_text[words] = 1
+                        # index = open("website_index.txtd", "a+")
 
                         for word, frequency in frequencies.items():
                             unique_word.add(word)
                             word_url[word].append([url_no, frequency])
 
                             # linecache.clearcache()
-                        print(url_no)
+                        # print(url_no)
                         # for word in frequencies:
                         #    if word not in word_locations:
                         #       word_locations[word] = line
@@ -133,9 +155,13 @@ def file_parser(main_folder):
     with open("url_ids.txt", "w") as f:
         for id, url in url_ids.items():
             f.write(f'{{{id}: {url}}}\n')
+    with open("important_text.txt", "w", encoding='utf-8') as f:
+        for words, count in important_text.items():
+            f.write(f'{{{words}: {count}}}\n')
     f.close()
 
 
 if __name__ == "__main__":
-    file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/ANALYST")
+   #  file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/ANALYST")
+    file_parser("C:/Users/Anthony Wen/Downloads/CS121_Assignment3/analyst/ANALYST")
     print("--- %s seconds ---" % (time.time() - start_time))
