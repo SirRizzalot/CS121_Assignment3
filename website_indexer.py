@@ -23,12 +23,8 @@ from PartA import tokenizeHTMLString, computeWordFrequencies
 import string
 from sys import argv
 import time
-# import urllib3
-import urllib.request
 from bs4 import BeautifulSoup
-from lxml import html, etree
-import sys
-import re
+
 
 class urlWordInfo:
     def __init__(self):
