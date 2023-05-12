@@ -66,6 +66,8 @@ def file_parser(main_folder):
     url_ids = dict()
     word_url = defaultdict(list)
     url_no = 0
+    line_no = 0 #track line number of word on website_index.txt after writing to it
+    word_line = dict() # map word with its line_no
 
     important_text = dict()
 
@@ -108,6 +110,7 @@ def file_parser(main_folder):
                         # index = open("website_index.txtd", "a+")
 
                         for word, frequency in frequencies.items():
+                            #print(word)
                             unique_word.add(word)
                             word_url[word].append([url_no, frequency])
 
@@ -148,6 +151,8 @@ def file_parser(main_folder):
                 continue
     with open("website_index.txt", "w") as f:
         for word, details in sorted(word_url.items()):
+            word_line[word] = line_no
+            line_no += 1
             f.write(f"{word}: ")
             for detail in details:
                 f.write(f"{{{detail[0]}, {detail[1]}}}, ")
@@ -159,9 +164,10 @@ def file_parser(main_folder):
         for words, count in important_text.items():
             f.write(f'{{{words}: {count}}}\n')
     f.close()
-
+    print(word_line)
 
 if __name__ == "__main__":
    #  file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/ANALYST")
-    file_parser("C:/Users/Anthony Wen/Downloads/CS121_Assignment3/analyst/ANALYST")
+   #  file_parser("C:/Users/Anthony Wen/Downloads/CS121_Assignment3/analyst/ANALYST")
+    file_parser("C:/Users/thyva.000/cs121/a3-m1/CS121_Assignment3/TEMP")
     print("--- %s seconds ---" % (time.time() - start_time))
