@@ -109,7 +109,7 @@ def file_parser(main_folder):
                         # url_id = hash(data["url"])
                         # add the url to the id dictionary
                         url_ids[url_no] = data["url"]
-                        url_no += 1
+
                         
                         # getting important text from content
                         soup = BeautifulSoup(data["content"], 'lxml')
@@ -128,9 +128,9 @@ def file_parser(main_folder):
                         for word, info in url_info.getWordInfo().items():
                             organized_info = ""
                             if len(info) > 1:
-                                organized_info += f"{info[0][1]},{info[1][1]},{data['url']}"
+                                organized_info += f"{info[0][1]},{info[1][1]},{url_no}"
                             else:
-                                organized_info += f"{info[0][1]},0,{data['url']}"
+                                organized_info += f"{info[0][1]},0,{url_no}"
                             unique_word.add(word)
                             word_url[word].append(organized_info)
 
@@ -166,6 +166,7 @@ def file_parser(main_folder):
 
                     f.close()
                     document_count += 1
+                    url_no += 1
             except json.JSONDecodeError as e:
                 print(f"File {file} is not a valid json file")
                 continue
