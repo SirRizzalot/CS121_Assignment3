@@ -85,9 +85,10 @@ def file_parser(main_folder):
                         # call function to add the url to a file
                         
                         #content parsing - extract html tags
-                        CLEANR = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
-                        words = re.sub(CLEANR, ' ', data["content"])
-                        #words = BeautifulSoup(data["content"], "lxml").text
+                        # CLEANR = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
+                        # words = re.sub(CLEANR, ' ', data["content"])
+                        words = BeautifulSoup(data["content"], "lxml").text
+                        
                         words_list = tokenizeHTMLString(words)
                         frequencies = computeWordFrequencies(words_list)
 
