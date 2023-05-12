@@ -78,6 +78,7 @@ def file_parser(main_folder):
     url_ids = dict()
     word_url = defaultdict(list)
     url_no = 0
+    document_count = 0
     line_no = 0 #track line number of word on website_index.txt after writing to it
     word_line = dict() # map word with its line_no
 
@@ -164,7 +165,7 @@ def file_parser(main_folder):
                         #       linecache.clearcache()
 
                     f.close()
-
+                    document_count += 1
             except json.JSONDecodeError as e:
                 print(f"File {file} is not a valid json file")
                 continue
@@ -174,15 +175,19 @@ def file_parser(main_folder):
             line_no += 1
             f.write(f"{word}: {details}\n")
             t.write(f"{word} : {line_no}\n")
+    f.close()
+    t.close()
     with open("url_ids.txt", "w") as f:
         for id, url in url_ids.items():
             f.write(f'{{{id}: {url}}}\n')
-    t.close()
+    f.close()
+    with open("count.txt", "w") as f:
+        f.write(str(document_count))
     f.close()
     #print(word_line)
 
 if __name__ == "__main__":
    #  file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/ANALYST")
    #  file_parser("C:/Users/Anthony Wen/Downloads/CS121_Assignment3/analyst/ANALYST")
-    file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/ANALYST")
+    file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/DEV")
     print("--- %s seconds ---" % (time.time() - start_time))
