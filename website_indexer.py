@@ -9,6 +9,12 @@
 #   apple: [apple.com, appleAreNice.com]
 #   pineapple: [pineapple.com, pineappleAreNice.com]
 ######################################################################################################################
+# team members:
+# Lance Li - 90653176
+#
+#
+#
+######################################################################################################################
 import os
 import json
 from collections import defaultdict
@@ -23,6 +29,16 @@ from bs4 import BeautifulSoup
 from lxml import html, etree
 import sys
 import re
+
+class urlWordInfo:
+    def __init__(self):
+        self.word_info = defaultdict(list)
+
+    def addWordInfo(self, word, word_info):
+        self.word_info[word].append(word_info)
+
+    def getWordInfo(self):
+        return self.word_info
 
 start_time = time.time()
 
@@ -101,24 +117,25 @@ def file_parser(main_folder):
                         # getting important text from content
                         soup = BeautifulSoup(data["content"], 'lxml')
                         tags = ['b', 'strong', 'h1', 'h2', 'h3', 'title']
-                        text = [tag.text for tag in soup.find_all(tags)]
-                        
-                        # if(len(text) > 0):
-                        #     print(text)
-                        #     print(data["url"])
-                        #     sys.exit()
-                        
-                        for words in text:
-                            if words in important_text:
-                                important_text[words] += 1
-                            else:
-                                important_text[words] = 1
-                        # index = open("website_index.txtd", "a+")
+                        special_case = [tag.text for tag in soup.find_all(tags)]
+                        special_case_list = tokenizeHTMLString(" ".join(special_case))
+                        special_case_frequencies = computeWordFrequencies(special_case_list)
 
+                        url_info = urlWordInfo()
                         for word, frequency in frequencies.items():
-                            #print(word)
+                            url_info.addWordInfo(word, ["regular", frequency])
+
+                        for word, frequency in special_case_frequencies.items():
+                            url_info.addWordInfo(word, ["special_case", frequency])
+
+                        for word, info in url_info.getWordInfo().items():
+                            organized_info = ""
+                            if len(info) > 1:
+                                organized_info += f"{info[0][1]},{info[1][1]},{data['url']}"
+                            else:
+                                organized_info += f"{info[0][1]},0,{data['url']}"
                             unique_word.add(word)
-                            word_url[word].append([url_no, frequency])
+                            word_url[word].append(organized_info)
 
                             # linecache.clearcache()
                         # print(url_no)
@@ -155,25 +172,21 @@ def file_parser(main_folder):
             except json.JSONDecodeError as e:
                 print(f"File {file} is not a valid json file")
                 continue
-    with open("website_index.txt", "w") as f:
+    with open("website_index.txt", "w", encoding='utf-8') as f, open("word_index_locator.txt", "w", encoding='utf-8') as t:
+        line_no = 0
         for word, details in sorted(word_url.items()):
-            word_line[word] = line_no
             line_no += 1
-            f.write(f"{word}: ")
-            for detail in details:
-                f.write(f"{{{detail[0]}, {detail[1]}}}, ")
-            f.write("\n")
+            f.write(f"{word}: {details}\n")
+            t.write(f"{word} : {line_no}\n")
     with open("url_ids.txt", "w") as f:
         for id, url in url_ids.items():
             f.write(f'{{{id}: {url}}}\n')
-    with open("important_text.txt", "w", encoding='utf-8') as f:
-        for words, count in important_text.items():
-            f.write(f'{{{words}: {count}}}\n')
+    t.close()
     f.close()
     #print(word_line)
 
 if __name__ == "__main__":
    #  file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/ANALYST")
    #  file_parser("C:/Users/Anthony Wen/Downloads/CS121_Assignment3/analyst/ANALYST")
-    file_parser("C:/Users/thyva.000/cs121/a3-m1/CS121_Assignment3/ANALYST")
+    file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/ANALYST")
     print("--- %s seconds ---" % (time.time() - start_time))
