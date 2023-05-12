@@ -15,14 +15,14 @@ from collections import defaultdict
 
 from PartA import tokenizeHTMLString, computeWordFrequencies
 import string
-import linecache
 from sys import argv
-from itertools import islice
 import time
 # import urllib3
 import urllib.request
 from bs4 import BeautifulSoup
+from lxml import html, etree
 import sys
+import re
 
 start_time = time.time()
 
@@ -83,7 +83,12 @@ def file_parser(main_folder):
                     with open(os.path.join(folder, file), "r") as f:
                         data = json.load(f)
                         # call function to add the url to a file
-                        words_list = tokenizeHTMLString(data["content"])
+                        
+                        #content parsing - extract html tags
+                        CLEANR = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
+                        words = re.sub(CLEANR, ' ', data["content"])
+                        #words = BeautifulSoup(data["content"], "lxml").text
+                        words_list = tokenizeHTMLString(words)
                         frequencies = computeWordFrequencies(words_list)
 
                         # hash the url
@@ -164,10 +169,10 @@ def file_parser(main_folder):
         for words, count in important_text.items():
             f.write(f'{{{words}: {count}}}\n')
     f.close()
-    print(word_line)
+    #print(word_line)
 
 if __name__ == "__main__":
    #  file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/ANALYST")
    #  file_parser("C:/Users/Anthony Wen/Downloads/CS121_Assignment3/analyst/ANALYST")
-    file_parser("C:/Users/thyva.000/cs121/a3-m1/CS121_Assignment3/TEMP")
+    file_parser("C:/Users/thyva.000/cs121/a3-m1/CS121_Assignment3/ANALYST")
     print("--- %s seconds ---" % (time.time() - start_time))
