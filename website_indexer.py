@@ -189,9 +189,10 @@ def file_parser(main_folder):
             writer_t.writerow([word, line_no])
     f.close()
     t.close()
-    with open("url_ids.txt", "w") as f:
+    with open("url_ids.csv", "w", encoding='utf-8', newline='') as f:
+        writer_f = csv.writer(f)
         for id, url in url_ids.items():
-            f.write(f'{{{id}: {url}}}\n')
+            writer_f.writerow([id, url])
     f.close()
     with open("count.txt", "w") as f:
         f.write(str(document_count))
