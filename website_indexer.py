@@ -10,10 +10,10 @@
 #   pineapple: [pineapple.com, pineappleAreNice.com]
 ######################################################################################################################
 # team members:
-# Lance Li - 90653176
-#
-#
-#
+# Aileen Tran aileenyt, 79192463
+# Anthony Wen awen5, 62858003
+# Van Pham vantp2, 74369428
+# Lance Li lancekl, 90653176
 ######################################################################################################################
 import os
 import json
@@ -24,6 +24,7 @@ import string
 from sys import argv
 import time
 from bs4 import BeautifulSoup
+import lxml
 
 
 class urlWordInfo:
@@ -190,5 +191,6 @@ def file_parser(main_folder):
 if __name__ == "__main__":
    #  file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/ANALYST")
    #  file_parser("C:/Users/Anthony Wen/Downloads/CS121_Assignment3/analyst/ANALYST")
-    file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/DEV")
+    print(f"starting at: {start_time}")
+    file_parser("C:/Users/Lilan/Documents/CS121_Assignment3/DEV")
     print("--- %s seconds ---" % (time.time() - start_time))
