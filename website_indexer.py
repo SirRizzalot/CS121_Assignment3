@@ -15,6 +15,7 @@
 # Van Pham vantp2, 74369428
 # Lance Li lancekl, 90653176
 ######################################################################################################################
+import csv
 import os
 import json
 from collections import defaultdict
@@ -106,6 +107,7 @@ def file_parser(main_folder):
                         
                         # note: use words as the document string to compute tfidf
                         words_list = tokenizeHTMLString(words)
+                        print(words_list)
                         frequencies = computeWordFrequencies(words_list)
 
                         # get the tfidf_dict for this document
@@ -135,10 +137,14 @@ def file_parser(main_folder):
 
                         for word, info in url_info.getWordInfo().items():
                             organized_info = ""
+                            position = set()
+                            for i in range(len(words_list)):
+                                if words_list[i] == word:
+                                    position.add(i)
                             if len(info) > 1:
-                                organized_info += f"{info[0][1]},{info[1][1]},{url_no}"
+                                organized_info += f"{url_no},{info[0][1]},{info[1][1]},{position}"
                             else:
-                                organized_info += f"{info[0][1]},0,{url_no}"
+                                organized_info += f"{url_no},{info[0][1]},0, {position}"
                             unique_word.add(word)
                             word_url[word].append(organized_info)
 
@@ -178,12 +184,16 @@ def file_parser(main_folder):
             except json.JSONDecodeError as e:
                 print(f"File {file} is not a valid json file")
                 continue
-    with open("website_index.txt", "w", encoding='utf-8') as f, open("word_index_locator.txt", "w", encoding='utf-8') as t:
+    with open("website_index.csv", "w", encoding='utf-8', newline='') as f,\
+            open("word_index_locator.csv", "w", encoding='utf-8', newline='') as t:
+        writer_f = csv.writer(f)
+        writer_t = csv.writer(t)
         line_no = 0
         for word, details in sorted(word_url.items()):
+            print(word, details)
             line_no += 1
-            f.write(f"{word}: {details}\n")
-            t.write(f"{word} : {line_no}\n")
+            writer_f.writerow([word, details])
+            writer_t.writerow([word, line_no])
     f.close()
     t.close()
     with open("url_ids.txt", "w") as f:

@@ -21,10 +21,7 @@ def compute_tf_idf_weight(doc, word_list):
     
     # Create a dictionary to store the word and its corresponding TF-IDF score
     tfidf_dict = {}
-    count = 1
     for word, score in zip(feature_names, tfidf_scores):
         tfidf_dict[word] = score
-        count += 1
     
-    print(count)
     return tfidf_dict

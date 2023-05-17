@@ -49,7 +49,7 @@ def tokenizeHTMLString(HTMLString: str) -> set:
         
         tokenized_text = [] # initiating is constant
 
-        for word in re.findall('[0-9]+|(?:[a-zA-Z0-9]{1,}[a-zA-Z0-9]+(?:\'s|\.d){0,1})', HTMLString.lower()):
+        for word in re.findall('[a-zA-Z0-9]+(?:\'s|\.d){0,1}', HTMLString.lower()):
             ps = PorterStemmer()
             stem_word = ps.stem(word)
             tokenized_text.append(stem_word.lower())
