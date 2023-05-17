@@ -1,3 +1,19 @@
+############################################################
+# load in data
+# 1. determine what to find -> dictionary(word:urls)
+# booleanQuery ands and ors
+############################################################
+
+
+
+
+
+
+
+
+
+
+
 def generate_ngrams(sentence):
     words = sentence.split()
     n = len(words)
