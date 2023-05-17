@@ -25,6 +25,7 @@ from sys import argv
 import time
 from bs4 import BeautifulSoup
 import lxml
+from Ranking import compute_tf_idf_weight
 
 
 class urlWordInfo:
@@ -103,9 +104,15 @@ def file_parser(main_folder):
                         # words = re.sub(CLEANR, ' ', data["content"])
                         words = BeautifulSoup(data["content"], "lxml").text
                         
+                        # note: use words as the document string to compute tfidf
                         words_list = tokenizeHTMLString(words)
                         frequencies = computeWordFrequencies(words_list)
 
+                        # get the tfidf_dict for this document
+                        tfidf_dict = compute_tf_idf_weight(words, words_list)
+                        
+                        for word, weight in sorted(tfidf_dict.items()):
+                            print(f"{word}: {weight}")
                         # hash the url
                         # url_id = hash(data["url"])
                         # add the url to the id dictionary
@@ -192,5 +199,5 @@ if __name__ == "__main__":
    #  file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/ANALYST")
    #  file_parser("C:/Users/Anthony Wen/Downloads/CS121_Assignment3/analyst/ANALYST")
     print(f"starting at: {start_time}")
-    file_parser("C:/Users/Lilan/Documents/CS121_Assignment3/DEV")
+    file_parser("C:/Users/thyva.000/cs121/a3-m1/CS121_Assignment3/TEMP")
     print("--- %s seconds ---" % (time.time() - start_time))
