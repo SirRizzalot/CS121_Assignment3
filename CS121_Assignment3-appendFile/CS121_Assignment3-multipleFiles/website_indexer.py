@@ -10,31 +10,31 @@
 #   pineapple: [pineapple.com, pineappleAreNice.com]
 ######################################################################################################################
 # team members:
-# Lance Li - 90653176
-# Anthony Wen - 62858003
-# Van Pham - 74369428
-# Aileen Tran - 79192463
+# Aileen Tran aileenyt, 79192463
+# Anthony Wen awen5, 62858003
+# Van Pham vantp2, 74369428
+# Lance Li lancekl, 90653176
 ######################################################################################################################
+import csv
 import os
 import json
 from collections import defaultdict
-import big_o
+
 from PartA import tokenizeHTMLString, computeWordFrequencies
 import string
 from sys import argv
 import time
 from bs4 import BeautifulSoup
+import lxml
 
-#adds important info to url_info dictionary 
+
 class urlWordInfo:
     def __init__(self):
         self.word_info = defaultdict(list)
 
-    #adds type of word to value list
     def addWordInfo(self, word, word_info):
         self.word_info[word].append(word_info)
 
-    #returns dictionary of keys: unique words values: list of list containing type of word and frequency 
     def getWordInfo(self):
         return self.word_info
 
@@ -56,6 +56,13 @@ def write_token_to_file(token, url, frequency):
 
 # merge token files
 def merge_files(output_file):
+    #  with open(output_file, "w") as out_file:
+    #      for file in sorted(os.listdir("Tokens"), key=lambda x: x.lower()):
+    #          if file.endswith(".txt"):
+    #              with open(f"Tokens/{file}", "r") as in_file:
+    #                  for line in in_file:
+    #                      out_file.write(line)
+    #              os.remove(f"Tokens/{file}")
     lines = []
 
     for file in sorted(os.listdir("Tokens"), key=lambda x: x.lower()):
@@ -69,10 +76,9 @@ def merge_files(output_file):
 
 
 def file_parser(main_folder):
-
-    unique_word = set() # words in content no duplicates
-    url_ids = dict() 
-    word_url = defaultdict(list) 
+    unique_word = set()
+    url_ids = dict()
+    word_url = defaultdict(list)
     url_no = 0
     document_count = 0
     line_no = 0 #track line number of word on website_index.txt after writing to it
@@ -81,12 +87,10 @@ def file_parser(main_folder):
     important_text = dict()
 
     # read the main folder and loop through all the sub folders
-    # taking O(n)
     for folder in os.listdir(main_folder):
         # merges the path
         folder = os.path.join(main_folder, folder)
         # read the sub folder and loop through all the files
-        #nested loop O(n^2)
         for file in os.listdir(folder):
             # checks the file has a json extension
             try:
@@ -95,75 +99,98 @@ def file_parser(main_folder):
                         data = json.load(f)
                         # call function to add the url to a file
                         
-                        # creates unique hash id for url
-                        # url_id = hash(data["url"])
-                        # add the url to the url_id dictionary
-                        url_ids[url_no] = data["url"]
-                        url_no += 1
-
-                        #pulls word content from json file using lxml parser
+                        #content parsing - extract html tags
+                        # CLEANR = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
+                        # words = re.sub(CLEANR, ' ', data["content"])
                         words = BeautifulSoup(data["content"], "lxml").text
                         
-                        #takes the word list stems and tokenizes the word
                         words_list = tokenizeHTMLString(words)
-                        
-                        #frequency = {"word": str, "value": frequency}
                         frequencies = computeWordFrequencies(words_list)
-                        
+
+                        # hash the url
+                        # url_id = hash(data["url"])
+                        # add the url to the id dictionary
+                        url_ids[url_no] = data["url"]
+
                         
                         # getting important text from content
                         soup = BeautifulSoup(data["content"], 'lxml')
-                        
-                        #tags indicating important text
                         tags = ['b', 'strong', 'h1', 'h2', 'h3', 'title']
-                        #finds tags and stores the text associated with them
                         special_case = [tag.text for tag in soup.find_all(tags)]
                         special_case_list = tokenizeHTMLString(" ".join(special_case))
-                        #counts frequency of special words saves to dictionary
                         special_case_frequencies = computeWordFrequencies(special_case_list)
-                        
-                        url_info = urlWordInfo()
 
-                        #adds regular and special words and their frequencies to url_info
+                        url_info = urlWordInfo()
                         for word, frequency in frequencies.items():
                             url_info.addWordInfo(word, ["regular", frequency])
-                            
+
                         for word, frequency in special_case_frequencies.items():
                             url_info.addWordInfo(word, ["special_case", frequency])
-                        
-                        #organizes list so it is arranged by url_id, regular word freq, special word freq
-                        #then adds it as the value to the word in word_url dictionary
+
                         for word, info in url_info.getWordInfo().items():
-                            print("w ", word, " i ", info)
                             organized_info = ""
+                            position = set()
+                            for i in range(len(words_list)):
+                                if words_list[i] == word:
+                                    position.add(i)
                             if len(info) > 1:
-                                
-                                organized_info += f"{url_no}:{info[0][1]},{info[1][1]}"
-                                
+                                organized_info += f"{url_no},{info[0][1]},{info[1][1]}, {len(words_list)}, {position}"
                             else:
-                                organized_info += f"{url_no}:{info[0][1]}"
+                                organized_info += f"{url_no},{info[0][1]},0,{len(words_list)}, {position}"
                             unique_word.add(word)
                             word_url[word].append(organized_info)
-                        
-                        
-                           
+
+                            # linecache.clearcache()
+                        # print(url_no)
+                        # for word in frequencies:
+                        #    if word not in word_locations:
+                        #       word_locations[word] = line
+                        #       #index.write(word + ": " + data["url"] + "\n")
+                        #       index.write(f"{word} : {{{data['url']}, {frequencies[word]}}}\n")
+                        #       line += 1
+                        #    else:
+                        #       current_line = 0
+
+                        #       while current_line != word_locations[word]:
+                        #          #current_line_info = index.readline().strip()
+                        #          current_line+=1
+
+                        #       current_line_info = linecache.getline(r"website_index.txt", current_line)
+                        #       print(word + ": " + str(current_line))
+                        #       print(current_line_info)
+                        #       #current_line_info = index.readline()
+                        #       # putting urls with the same word into the same line.
+                        #       # 1st idea is to add to the end of the line we find it with
+                        #       # 2nd idea is to create a lot of text files each with a word then merge it at the end haha
+
+                        #       word_locations[word] = line
+                        #       print(data["url"])
+                        #       index.write(f"{current_line_info.strip()}, {{{data['url']}, {frequencies[word]}}}\n")
+                        #       #index.write(f"{word} : ({data['url']}, {frequencies[word]})\n")
+                        #       line += 1
+                        #       linecache.clearcache()
 
                     f.close()
                     document_count += 1
+                    url_no += 1
             except json.JSONDecodeError as e:
                 print(f"File {file} is not a valid json file")
                 continue
-    with open("website_index.txt", "w", encoding='utf-8') as f, open("word_index_locator.txt", "w", encoding='utf-8') as t:
+    with open("website_index.csv", "w", encoding='utf-8', newline='') as f,\
+            open("word_index_locator.csv", "w", encoding='utf-8', newline='') as t:
+        writer_f = csv.writer(f)
+        writer_t = csv.writer(t)
         line_no = 0
         for word, details in sorted(word_url.items()):
             line_no += 1
-            f.write(f"{word}: {details}\n")
-            t.write(f"{word} : {line_no}\n")
+            writer_f.writerow([word, details])
+            writer_t.writerow([word, line_no])
     f.close()
     t.close()
-    with open("url_ids.txt", "w") as f:
+    with open("url_ids.csv", "w", encoding='utf-8', newline='') as f:
+        writer_f = csv.writer(f)
         for id, url in url_ids.items():
-            f.write(f'{{{id}: {url}}}\n')
+            writer_f.writerow([id, url])
     f.close()
     with open("count.txt", "w") as f:
         f.write(str(document_count))
@@ -173,7 +200,6 @@ def file_parser(main_folder):
 if __name__ == "__main__":
    #  file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/ANALYST")
    #  file_parser("C:/Users/Anthony Wen/Downloads/CS121_Assignment3/analyst/ANALYST")
-    file_parser("C:/Users/ailee/Desktop/in4matx 141/CS121_Assignment3-appendFile/CS121_Assignment3-multipleFiles/TEMP")
-    #file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/DEV")
+    print(f"starting at: {start_time}")
+    file_parser("C:/Users/ailee/Desktop/in4matx 141/CS121_Assignment3-appendFile/CS121_Assignment3-multipleFiles/ANALYST")
     print("--- %s seconds ---" % (time.time() - start_time))
-    
