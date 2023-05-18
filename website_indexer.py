@@ -26,7 +26,6 @@ from sys import argv
 import time
 from bs4 import BeautifulSoup
 import lxml
-from Ranking import compute_tf_idf_weight
 
 
 class urlWordInfo:
@@ -105,17 +104,9 @@ def file_parser(main_folder):
                         # words = re.sub(CLEANR, ' ', data["content"])
                         words = BeautifulSoup(data["content"], "lxml").text
                         
-                        # note: use words as the document string to compute tfidf
                         words_list = tokenizeHTMLString(words)
                         frequencies = computeWordFrequencies(words_list)
 
-                        # get the tfidf_dict for this document
-                        tfidf_dict = dict()
-                        tfidf_dict = compute_tf_idf_weight(words)
-                        
-                        # test tfidf_dict
-                        for word, weight in sorted(tfidf_dict.items()):
-                            print(f"{word}: {weight}")
                         # hash the url
                         # url_id = hash(data["url"])
                         # add the url to the id dictionary
@@ -128,10 +119,10 @@ def file_parser(main_folder):
                         special_case = [tag.text for tag in soup.find_all(tags)]
                         special_case_list = tokenizeHTMLString(" ".join(special_case))
                         special_case_frequencies = computeWordFrequencies(special_case_list)
-                        
+
                         url_info = urlWordInfo()
                         for word, frequency in frequencies.items():
-                            url_info.addWordInfo(word, ["regular", frequency, tfidf_dict[word]])
+                            url_info.addWordInfo(word, ["regular", frequency])
 
                         for word, frequency in special_case_frequencies.items():
                             url_info.addWordInfo(word, ["special_case", frequency])
@@ -142,20 +133,46 @@ def file_parser(main_folder):
                             for i in range(len(words_list)):
                                 if words_list[i] == word:
                                     position.add(i)
-                            # info[0][1]: word frequency - info[1][1]: special case frequency - info[0][2]: tfidf weight of word
-                            # why needed if statement below? For some reasons, info[0][0] of some words are "special_case" 
-                            if info[0][0] == 'regular':
-                                if len(info) > 1:
-                                    organized_info += f"{url_no},{info[0][1]},{info[1][1]},{info[0][2]},{position}"
-                                else:
-                                    organized_info += f"{url_no},{info[0][1]},0,{info[0][2]},{position}"
+                            if len(info) > 1:
+                                organized_info += f"{url_no},{info[0][1]},{info[1][1]}, {len(words_list)}, {position}"
+                            else:
+                                organized_info += f"{url_no},{info[0][1]},0,{len(words_list)}, {position}"
                             unique_word.add(word)
                             word_url[word].append(organized_info)
+
+                            # linecache.clearcache()
+                        # print(url_no)
+                        # for word in frequencies:
+                        #    if word not in word_locations:
+                        #       word_locations[word] = line
+                        #       #index.write(word + ": " + data["url"] + "\n")
+                        #       index.write(f"{word} : {{{data['url']}, {frequencies[word]}}}\n")
+                        #       line += 1
+                        #    else:
+                        #       current_line = 0
+
+                        #       while current_line != word_locations[word]:
+                        #          #current_line_info = index.readline().strip()
+                        #          current_line+=1
+
+                        #       current_line_info = linecache.getline(r"website_index.txt", current_line)
+                        #       print(word + ": " + str(current_line))
+                        #       print(current_line_info)
+                        #       #current_line_info = index.readline()
+                        #       # putting urls with the same word into the same line.
+                        #       # 1st idea is to add to the end of the line we find it with
+                        #       # 2nd idea is to create a lot of text files each with a word then merge it at the end haha
+
+                        #       word_locations[word] = line
+                        #       print(data["url"])
+                        #       index.write(f"{current_line_info.strip()}, {{{data['url']}, {frequencies[word]}}}\n")
+                        #       #index.write(f"{word} : ({data['url']}, {frequencies[word]})\n")
+                        #       line += 1
+                        #       linecache.clearcache()
 
                     f.close()
                     document_count += 1
                     url_no += 1
-                    
             except json.JSONDecodeError as e:
                 print(f"File {file} is not a valid json file")
                 continue
@@ -165,15 +182,15 @@ def file_parser(main_folder):
         writer_t = csv.writer(t)
         line_no = 0
         for word, details in sorted(word_url.items()):
-            print(word, details)
             line_no += 1
             writer_f.writerow([word, details])
             writer_t.writerow([word, line_no])
     f.close()
     t.close()
-    with open("url_ids.txt", "w") as f:
+    with open("url_ids.csv", "w", encoding='utf-8', newline='') as f:
+        writer_f = csv.writer(f)
         for id, url in url_ids.items():
-            f.write(f'{{{id}: {url}}}\n')
+            writer_f.writerow([id, url])
     f.close()
     with open("count.txt", "w") as f:
         f.write(str(document_count))
