@@ -6,3 +6,13 @@
 #    + needs to fast
 #    + don't load in too much -> list of urls
 ############################################################
+import csv
+
+def load_data(file_name, separator):
+    with open(file_name, mode='r') as infile:
+        reader = csv.reader(infile)
+        with open('coors_new.csv', mode='w') as outfile:
+            writer = csv.writer(outfile)
+            mydict = {rows[0]:rows[1] for rows in reader}
+    return mydict
+

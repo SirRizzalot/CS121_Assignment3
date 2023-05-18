@@ -26,7 +26,9 @@ from sys import argv
 import time
 from bs4 import BeautifulSoup
 import lxml
+import math
 
+from Retrieval import load_data
 
 class urlWordInfo:
     def __init__(self):
@@ -197,9 +199,21 @@ def file_parser(main_folder):
     f.close()
     #print(word_line)
 
+    # calculating idf for words
+    idf_scores = {}
+    for word, posting in sorted(word_url.items()):
+        document_frequency = len(posting)
+        idf_scores[word] = math.log(url_no / document_frequency)
+    #print(idf_scores)
+    
+    # calculate tfidf for all docs
+    for postings in word_url.values():
+        print(postings) 
+
+
 if __name__ == "__main__":
    #  file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/ANALYST")
    #  file_parser("C:/Users/Anthony Wen/Downloads/CS121_Assignment3/analyst/ANALYST")
     print(f"starting at: {start_time}")
-    file_parser("C:/Users/thyva.000/cs121/a3-m1/CS121_Assignment3/ANALYST")
+    file_parser("C:/Users/thyva.000/cs121/a3-m1/CS121_Assignment3/TEMP")
     print("--- %s seconds ---" % (time.time() - start_time))
