@@ -88,6 +88,7 @@ def file_parser(main_folder):
 
     # read the main folder and loop through all the sub folders
     for folder in os.listdir(main_folder):
+        print(folder)
         # merges the path
         folder = os.path.join(main_folder, folder)
         # read the sub folder and loop through all the files
