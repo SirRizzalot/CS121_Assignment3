@@ -105,7 +105,6 @@ def file_parser(main_folder):
                         words = BeautifulSoup(data["content"], "lxml").text
                         
                         words_list = tokenizeHTMLString(words)
-                        print(words_list)
                         frequencies = computeWordFrequencies(words_list)
 
                         # hash the url
@@ -183,7 +182,6 @@ def file_parser(main_folder):
         writer_t = csv.writer(t)
         line_no = 0
         for word, details in sorted(word_url.items()):
-            print(word, details)
             line_no += 1
             writer_f.writerow([word, details])
             writer_t.writerow([word, line_no])
@@ -203,5 +201,5 @@ if __name__ == "__main__":
    #  file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/ANALYST")
    #  file_parser("C:/Users/Anthony Wen/Downloads/CS121_Assignment3/analyst/ANALYST")
     print(f"starting at: {start_time}")
-    file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/TEMP")
+    file_parser("C:/Users/Lilan/Documents/CS121_Assignment3/DEV")
     print("--- %s seconds ---" % (time.time() - start_time))
