@@ -134,9 +134,9 @@ def file_parser(main_folder):
                                 if words_list[i] == word:
                                     position.add(i)
                             if len(info) > 1:
-                                organized_info += f"{url_no},{info[0][1]},{info[1][1]},{position}"
+                                organized_info += f"{url_no},{info[0][1]},{info[1][1]}, {len(words_list)}, {position}"
                             else:
-                                organized_info += f"{url_no},{info[0][1]},0, {position}"
+                                organized_info += f"{url_no},{info[0][1]},0,{len(words_list)}, {position}"
                             unique_word.add(word)
                             word_url[word].append(organized_info)
 
