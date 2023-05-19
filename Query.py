@@ -5,7 +5,6 @@
 ############################################################
 from collections import defaultdict
 
-from Ranking import Ranker
 
 
 class Query(object):
@@ -13,21 +12,25 @@ class Query(object):
     def __init__(self, parent):
         self.parent = parent
         self.query = list()
+        # query words
         self.word_info = defaultdict()
+        # word : url data
+        self.no_show = set()
+        # set of words that does not have an url
 
     def querying(self):
-        self.query = input("what you want to search?\n").split()
+        self.query = input("what you want to search?\n").lower().split()
         ordered = sorted(self.parent.get_location(self.query), key=lambda x: x[1])
         print(ordered)
-        no_show = {i for i in ordered if i[1] == 0}
-        print(no_show)
+        self.no_show = {i for i in ordered if i[1] == 0}
+        print(self.no_show)
         self.word_info = self.parent.load_websitetxt(ordered)
         print(self.word_info.items())
-        score_list = {}
-        for word in self.query:
-            word_rank = Ranker(word, self)
-            word_rank.getScore()
-            score_list[word] = word_rank.score
+        # score_list = {}
+        # for word in self.query:
+        #     word_rank = Ranker(word, self)
+        #     word_rank.getScore()
+        #     score_list[word] = word_rank.score
 
 
     def generate_ngrams(self,sentence):
