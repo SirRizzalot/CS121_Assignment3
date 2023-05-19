@@ -24,7 +24,11 @@ class QueryDB(object):
     def get_location(self, word_list):
         data = {}
         for k in word_list:
-            data[k] = int(self.id_to_index[k])
+            try:
+                data[k] = int(self.id_to_index[k])
+            except KeyError:
+                data[k] = 0
+        print(data.items())
         return data.items()
 
 
@@ -38,19 +42,24 @@ class QueryDB(object):
                 data[int(key)] = value
         return data
 
-    def load_websitetxt(self, text):
+    def load_websitetxt(self, list_of_location):
         data = defaultdict(list)
-        keys = text.split()
+        # keys = text.split()
         with open('website_index.txt') as file:
-            for line in file:
+            counter = 0
+            for word, location in list_of_location:
+                if location == 0:
+                    continue
+                while counter < location:
+                    counter+=1
+                    file.readline()
+                line = file.readline()
                 line = line.strip()
                 key, value = line.split(': ')
-
-                if key in keys:
-                    value1 = value[1:-1].replace("'", "").split(", ")
-
-                    for i in value1:
-                        data[key].append(i.split(","))
+                value1 = value[1:-1].replace("'", "").split(", ")
+                for i in value1:
+                    data[key].append(i.split(","))
+        # print(data)
         return data
 
     def get_urls(self, data):
