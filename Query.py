@@ -3,17 +3,31 @@
 # 1. determine what to find -> dictionary(word:urls)
 # booleanQuery ands and ors
 ############################################################
+from collections import defaultdict
+
+from Ranking import Ranker
+
 
 class Query(object):
 
     def __init__(self, parent):
         self.parent = parent
         self.query = list()
-        self.word_info = dict()
+        self.word_info = defaultdict()
 
     def querying(self):
         self.query = input("what you want to search?\n").split()
         ordered = sorted(self.parent.get_location(self.query), key=lambda x: x[1])
+        print(ordered)
+        no_show = {i for i in ordered if i[1] == 0}
+        print(no_show)
+        self.word_info = self.parent.load_websitetxt(ordered)
+        print(self.word_info.items())
+        score_list = {}
+        for word in self.query:
+            word_rank = Ranker(word, self)
+            word_rank.getScore()
+            score_list[word] = word_rank.score
 
 
     def generate_ngrams(self,sentence):
