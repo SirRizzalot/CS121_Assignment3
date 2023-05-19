@@ -202,5 +202,5 @@ if __name__ == "__main__":
    #  file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/ANALYST")
    #  file_parser("C:/Users/Anthony Wen/Downloads/CS121_Assignment3/analyst/ANALYST")
     print(f"starting at: {start_time}")
-    file_parser("C:/Users/Lilan/Documents/CS121_Assignment3/DEV")
+    file_parser("C:/Users/Anthony Wen/Downloads/CS121_Assignment3/developer/DEV")
     print("--- %s seconds ---" % (time.time() - start_time))
