@@ -199,16 +199,6 @@ def file_parser(main_folder):
     f.close()
     #print(word_line)
 
-    # calculating idf for words
-    idf_scores = {}
-    for word, posting in sorted(word_url.items()):
-        document_frequency = len(posting)
-        idf_scores[word] = math.log(url_no / document_frequency)
-    #print(idf_scores)
-    
-    # calculate tfidf for all docs
-    for postings in word_url.values():
-        print(postings) 
 
 
 if __name__ == "__main__":
