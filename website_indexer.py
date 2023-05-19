@@ -93,6 +93,8 @@ def file_parser(main_folder):
         # merges the path
         folder = os.path.join(main_folder, folder)
         # read the sub folder and loop through all the files
+        if(folder.endswith(".DS_Store")):
+            continue
         for file in os.listdir(folder):
             # checks the file has a json extension
             try:
@@ -178,8 +180,8 @@ def file_parser(main_folder):
             except json.JSONDecodeError as e:
                 print(f"File {file} is not a valid json file")
                 continue
-    with open("website_index.csv", "w", encoding='utf-8', newline='') as f,\
-            open("word_index_locator.csv", "w", encoding='utf-8', newline='') as t:
+    with open("index/website_index.csv", "w", encoding='utf-8', newline='') as f,\
+            open("index/word_index_locator.csv", "w", encoding='utf-8', newline='') as t:
         writer_f = csv.writer(f)
         writer_t = csv.writer(t)
         line_no = 0
@@ -189,12 +191,12 @@ def file_parser(main_folder):
             writer_t.writerow([word, line_no])
     f.close()
     t.close()
-    with open("url_ids.csv", "w", encoding='utf-8', newline='') as f:
+    with open("index/url_ids.csv", "w", encoding='utf-8', newline='') as f:
         writer_f = csv.writer(f)
         for id, url in url_ids.items():
             writer_f.writerow([id, url])
     f.close()
-    with open("count.txt", "w") as f:
+    with open("index/count.txt", "w") as f:
         f.write(str(document_count))
     f.close()
     #print(word_line)
@@ -217,6 +219,8 @@ def file_parser2(main_folder):
         # merges the path
         folder = os.path.join(main_folder, folder)
         # read the sub folder and loop through all the files
+        if (folder.endswith(".DS_Store")):
+            continue
         for file in os.listdir(folder):
             # checks the file has a json extension
             try:
@@ -301,8 +305,8 @@ def file_parser2(main_folder):
             except json.JSONDecodeError as e:
                 print(f"File {file} is not a valid json file")
                 continue
-    with open("website_index2.csv", "w", encoding='utf-8', newline='') as f, \
-            open("word_index_locator2.csv", "w", encoding='utf-8', newline='') as t:
+    with open("index/website_index2.csv", "w", encoding='utf-8', newline='') as f, \
+            open("index/word_index_locator2.csv", "w", encoding='utf-8', newline='') as t:
         writer_f = csv.writer(f)
         writer_t = csv.writer(t)
         line_no = 0
@@ -312,12 +316,12 @@ def file_parser2(main_folder):
             writer_t.writerow([word, line_no])
     f.close()
     t.close()
-    with open("url_ids2.csv", "w", encoding='utf-8', newline='') as f:
+    with open("index/url_ids2.csv", "w", encoding='utf-8', newline='') as f:
         writer_f = csv.writer(f)
         for id, url in url_ids.items():
             writer_f.writerow([id, url])
     f.close()
-    with open("count2.txt", "w") as f:
+    with open("index/count2.txt", "w") as f:
         f.write(str(document_count))
     f.close()
     # print(word_line)
@@ -450,19 +454,19 @@ if __name__ == "__main__":
    #  file_parser("C:/Users/Anthony Wen/Downloads/CS121_Assignment3/analyst/ANALYST")
     print(f"starting at: {start_time}")
    # Create threads for each file path
-    thread1 = threading.Thread(target=file_parser, args=("C:/Users/Lilan/Documents/CS121_Assignment3/DEV",))
-   #  thread2 = threading.Thread(target=file_parser2, args=("C:/Users/Lilan/Documents/CS121_Assignment3/DEV2",))
-    thread3 = threading.Thread(target=file_parser3, args=("C:/Users/Lilan/Documents/CS121_Assignment3/DEV3",))
+   #  thread1 = threading.Thread(target=file_parser, args=("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/DEV",))
+    thread2 = threading.Thread(target=file_parser2, args=("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/DEV2",))
+   #  thread3 = threading.Thread(target=file_parser3, args=("C:/Users/Lilan/Documents/CS121_Assignment3/DEV3",))
 
     # Start the threads
     # thread1.start()
-    # thread2.start()
-    thread3.start()
+    thread2.start()
+    # thread3.start()
 
     # Wait for the threads to finish
     # thread1.join()
-    # thread2.join()
-    thread3.join()
+    thread2.join()
+    # thread3.join()
 
 
     print("--- %s seconds ---" % (time.time() - start_time))

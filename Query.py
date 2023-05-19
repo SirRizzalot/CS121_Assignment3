@@ -4,27 +4,29 @@
 # booleanQuery ands and ors
 ############################################################
 
+class Query(object):
+
+    def __init__(self, parent):
+        self.parent = parent
+        self.query = list()
+        self.word_info = dict()
+
+    def querying(self):
+        self.query = input("what you want to search?\n").split()
+        ordered = sorted(self.parent.get_location(self.query), key=lambda x: x[1])
 
 
+    def generate_ngrams(self,sentence):
+        words = sentence.split()
+        n = len(words)
+        ngram_map = {}
 
+        for i in range(n, 0, -1):
+            ngrams = []
+            for j in range(0, n - i + 1):
+                ngram = ' '.join(words[j:j + i])
+                ngrams.append(ngram)
 
+            ngram_map[i] = ngrams
 
-
-
-
-
-
-def generate_ngrams(sentence):
-    words = sentence.split()
-    n = len(words)
-    ngram_map = {}
-
-    for i in range(n, 0, -1):
-        ngrams = []
-        for j in range(0, n - i + 1):
-            ngram = ' '.join(words[j:j + i])
-            ngrams.append(ngram)
-
-        ngram_map[i] = ngrams
-
-    return ngram_map
+        return ngram_map
