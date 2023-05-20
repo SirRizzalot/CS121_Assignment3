@@ -6,6 +6,8 @@
 from collections import defaultdict
 from nltk.stem import PorterStemmer
 
+
+
 class Query(object):
     
     def __init__(self, parent):
@@ -18,14 +20,12 @@ class Query(object):
         # set of words that does not have an url
 
     def querying(self):
-        ps = PorterStemmer()
-    
+        stem = PorterStemmer()
         self.query = input("what you want to search?\n").lower().split()
-        self.query = list(map(ps.stem, self.query))
-        print(self.query)
+        self.query = [stem.stem(i) for i in self.query]
         ordered = sorted(self.parent.get_location(self.query), key=lambda x: x[1])
-        #print(self.query)
-        # print(ordered)
+        print(ordered)
+
         self.no_show = {i for i in ordered if i[1] == 0}
         #print(self.no_show)
         self.word_info = self.parent.load_websitetxt(ordered)
