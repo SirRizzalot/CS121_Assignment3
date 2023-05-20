@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ############################################################
 # load in data
 # 1. determining weights
@@ -7,28 +6,28 @@
 ############################################################
 from sklearn.feature_extraction.text import TfidfVectorizer
 from PartA import tokenizeHTMLString
-from Retrieval import load_websitetxt, load_datatxt
 from collections import defaultdict
 import math
 from numpy import dot
 from numpy.linalg import norm
 
-keys = ["clase","clasp"]
-# retrieve data from index files
-# for now, website_data: 
-# {word1:[(tf,sp,id),(tf,sp,id),(tf,sp,id)], word2:[(tf,sp,id),(tf,sp,id)]}
-website_data = load_websitetxt('website_index.txt', keys)
-url_data = load_datatxt('url_ids.txt')
-url_no = len(url_data)
-#print(url_data)
+# # retrieve data from index files
+# # for now, website_data: 
+# # {word1:[(tf,sp,id),(tf,sp,id),(tf,sp,id)], word2:[(tf,sp,id),(tf,sp,id)]}
+# website_data = load_websitetxt('website_index.txt', keys)
+# url_data = load_datatxt('url_ids.txt')
+# url_no = len(url_data)
+# #print(url_data)
 
 # score and sort the list of urls for each word in the index
 class Ranker:
-    def __init__(self, word, database):
-        self.database = database
+    def __init__(self, word, data):
+        self.data = data
+        self.word_info = self.data.word_info
+        self.url_no = self.data.parent.url_no
         self.word = word
-        if (word in website_data):
-            self.posting = website_data[word] # list of all postings of the word
+        if (word in self.word_info):
+            self.posting = self.word_info[word] # list of all postings of the word
         self.tfidf_score = {}
         self.score = {} # {url1:score1, url2:score2,....}
     
@@ -37,8 +36,7 @@ class Ranker:
     # notice that IDF score is typically shared among all postings of the same word in the inverted index.
     def calculateIDF(self):     
         document_frequency = len(self.posting) # no of document the word appears
-        idf_score = math.log(url_no / document_frequency)
-            
+        idf_score = math.log(self.url_no / document_frequency)
         return idf_score
         
     # a function to calculate tf for all postings of a word
@@ -54,7 +52,7 @@ class Ranker:
     
     def calculateTFIDF(self):
         # check if the word is in the index
-        if self.word in website_data:
+        if self.word in self.word_info:
             idf_score = self.calculateIDF()
             tf_scores = self.calculateTF()
             tfidf_scores = {}
@@ -75,7 +73,7 @@ class Ranker:
     # needs to call self.calculateTFIDF() to get the dict of tfidf score of all postings of the word
     def getscore(self):
         # check if the word is in the index
-        if self.word in website_data:           
+        if self.word in self.word_info:          
             # calculate tfidf scores
             self.calculateTFIDF() 
             for document in self.posting:
@@ -97,10 +95,11 @@ class Ranker:
         return self.score
 
 # calculate tf_idf score list for the query
-def get_tf_idf_of_query_words(queryWordList):
+def get_tf_idf_of_query_words(queryWordList, data):
     query_score = []   # format: [word1_score, word2_score, word3_score]
     for word in queryWordList:
-        if word not in website_data:
+        if word not in data.word_info:  # data.word_info (look at word_info of Query class)
+            print("ohhh weird")
             query_score.append(0)
         else:
             # calculate tf
@@ -108,8 +107,8 @@ def get_tf_idf_of_query_words(queryWordList):
             tf_score = 1 + math.log(word_frequency / len(queryWordList))
             
             # calculate idf
-            document_frequency = len(website_data[word]) # no of document the word appears
-            idf_score = math.log(url_no / document_frequency)
+            document_frequency = len(data.word_info[word]) # no of document the word appears
+            idf_score = math.log(data.parent.url_no / document_frequency)    # data.parent.url_no (look at url_no of QueryObject class)
 
             # calculate tf idf
             tfidf_score = tf_score * idf_score
@@ -138,156 +137,3 @@ def compute_cosine_similarities(query_score, document_score):
     return cos_sim
 
    
-if __name__ == '__main__':
-    query_words = ["clase","clasp"]
-    score_list = {}
-    # loop through all words in the query to get score set of all postings having that word
-    # score_list has the form:
-    # {
-    #     word: {doc:score, doc:score, doc:score},
-    #     word: {doc:score, doc:score}
-    # }
-    for word in query_words:
-        word_rank = Ranker(word, "database")
-        word_rank.getscore()
-        score_list[word] = word_rank.score
-
-    # get query tfidf score
-    query_score = get_tf_idf_of_query_words(query_words)
-    
-    #dictionary format of score of words in query for all urls having them
-    # {
-    #     url1: {score_w1, score_w2, score_w3},
-    #     url2: {score_w1, score_w2, score_w3},
-    #     url3: {score_w1, score_w2, score_w3},
-    # }
-    all_doc_vector = {}
-    for word in query_words:
-        for url in url_data:
-            url = int(url[1:])
-            if url in score_list[word]:
-                if url in all_doc_vector:
-                    all_doc_vector[url].append(score_list[word][url])
-                else:
-                    all_doc_vector[url] = []
-                    all_doc_vector[url].append(score_list[word][url])
-                #doc_score = get_tf_idf_of_a_doc(query_words, score_list, url)
-                #cos_sim = compute_cosine_similarities(query_score, doc_score)
-                #print(cos_sim)
-
-    # add score 0 to words not appear in url but appears in query
-    for url in all_doc_vector:
-        if len(all_doc_vector[url]) < len(query_words):
-            for i in range(len(query_words) - len(all_doc_vector[url])):
-                all_doc_vector[url].append(0)
-        
-    
-    for doc in all_doc_vector:
-        cos_sim = compute_cosine_similarities(query_score, all_doc_vector[doc])
-        print(f"{doc} : {cos_sim}")
-    
-=======
-# ############################################################
-# # load in data
-# # 1. determining weights
-# # 2. create scoring functions
-# # 3. compare scores
-# ############################################################
-# from PartA import tokenizeHTMLString
-# from Retrieval import load_websitetxt, load_datatxt
-# from collections import defaultdict
-# import math
-#
-# keys = ["class", "zzxyz"]
-# # retrieve data from index files
-# # for now, website_data:
-# # {word1:[(tf,sp,id),(tf,sp,id),(tf,sp,id)], word2:[(tf,sp,id),(tf,sp,id)]}
-# website_data = load_websitetxt('website_index.txt', keys)
-# url_data = load_datatxt('url_ids.txt')
-# url_no = len(url_data)
-#
-#
-# # score and sort the list of urls for each word in the index
-# class Ranker:
-#     def __init__(self, word):
-#         self.word = word
-#         if (word in website_data):
-#             self.posting = website_data[word]  # list of all postings of the word
-#         self.tfidf_score = {}
-#         self.score = {}  # {url1:score1, url2:score2,....}
-#
-#     # a function to calculate idf for a word
-#     # receive a posting list of a single word and calculate idf score for that word
-#     # notice that IDF score is typically shared among all postings of the same word in the inverted index.
-#     def calculateIDF(self):
-#         document_frequency = len(self.posting)  # no of document the word appears
-#         idf_score = math.log(url_no / document_frequency)
-#
-#         return idf_score
-#
-#     # a function to calculate tf for all postings of a word
-#     # receive a posting list of a single word and calculate tf score for all postings of that word
-#     def calculateTF(self):
-#         tf_scores = {}
-#         for document in self.posting:
-#             doc_id = document[2]
-#             term_frequency = document[0]
-#             tf_scores[doc_id] = 1 + math.log(term_frequency)  # right formular will be 1 + math.log(tf / word_count)
-#
-#         return tf_scores
-#
-#     def calculateTFIDF(self):
-#         # check if the word is in the index
-#         if self.word in website_data:
-#             idf_score = self.calculateIDF()
-#             tf_scores = self.calculateTF()
-#             tfidf_scores = {}
-#             for document in self.posting:
-#                 doc_id = document[2]
-#                 doc_tf = tf_scores[doc_id]
-#                 doc_score = doc_tf * idf_score
-#                 tfidf_scores[doc_id] = doc_score
-#
-#             # return tfidf_scores
-#             self.tfidf_score = tfidf_scores
-#         else:
-#             # if word is not in the index, self.tfidf score of the word will be 0
-#             self.tfidf_score = 0
-#
-#     # posting is the array of posting for a word
-#     # needs to call self.calculateTFIDF() to get the dict of tfidf score of all postings of the word
-#     def getscore(self):
-#         # check if the word is in the index
-#         if self.word in website_data:
-#             # calculate tfidf scores
-#             self.calculateTFIDF()
-#             for document in self.posting:
-#                 doc_id = document[2]
-#                 # get document tf-idf value
-#                 self.score[doc_id] = self.tfidf_score[doc_id]
-#                 # if the special_frequency is not 0
-#                 if document[1] > 0:
-#                     self.score[doc_id] = document[1]
-#             # return self.score
-#
-#     # sort the urls by score
-#     def sorturl(self):
-#         sorted_score = sorted(self.score.items(), key=lambda x: x[1], reverse=True)
-#         self.score.clear()
-#         for key, value in sorted_score:
-#             self.score[key] = value
-#         return self.score
-#
-#     # WILL BE IMPLEMENTED ******************************
-#     def get_tf_idf_of_query_words(self, query):
-#         # search through the website_index dictionary
-#         # to get specific words in query, get posting list
-#         # then take the top 5 queries
-#         return 0
-#
-#
-# if __name__ == '__main__':
-#     word_rank = Ranker("class")
-#     word_rank.getscore()
-#     print(word_rank.sorturl())
->>>>>>> aa4dfc13af83a88c67135f5c36ec2186bf3a632d

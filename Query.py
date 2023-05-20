@@ -6,7 +6,6 @@
 from collections import defaultdict
 
 
-
 class Query(object):
 
     def __init__(self, parent):
@@ -21,11 +20,13 @@ class Query(object):
     def querying(self):
         self.query = input("what you want to search?\n").lower().split()
         ordered = sorted(self.parent.get_location(self.query), key=lambda x: x[1])
-        print(ordered)
+        #print(self.query)
+        # print(ordered)
         self.no_show = {i for i in ordered if i[1] == 0}
-        print(self.no_show)
+        #print(self.no_show)
         self.word_info = self.parent.load_websitetxt(ordered)
-        print(self.word_info.items())
+        print(self.word_info)
+        #print(self.word_info.items())
         # score_list = {}
         # for word in self.query:
         #     word_rank = Ranker(word, self)

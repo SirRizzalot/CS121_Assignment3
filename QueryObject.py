@@ -1,4 +1,3 @@
-
 from collections import defaultdict
 import csv
 
@@ -28,7 +27,7 @@ class QueryDB(object):
                 data[k] = int(self.id_to_index[k])
             except KeyError:
                 data[k] = 0
-        print(data.items())
+        #print(data.items())
         return data.items()
 
 
@@ -58,7 +57,9 @@ class QueryDB(object):
                 key, value = line.split(': ')
                 value1 = value[1:-1].replace("'", "").split(", ")
                 for i in value1:
-                    data[key].append(i.split(","))
+                    info = i.split(",")
+                    int_info = [int(x) for x in info]
+                    data[key].append(int_info)
         # print(data)
         return data
 

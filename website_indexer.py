@@ -26,13 +26,8 @@ from sys import argv
 import time
 from bs4 import BeautifulSoup
 import lxml
-<<<<<<< HEAD
-import math
-=======
 import threading
->>>>>>> aa4dfc13af83a88c67135f5c36ec2186bf3a632d
 
-from Retrieval import load_data
 
 class urlWordInfo:
     def __init__(self):
@@ -207,8 +202,6 @@ def file_parser(main_folder):
     #print(word_line)
 
 
-<<<<<<< HEAD
-=======
 def file_parser2(main_folder):
     unique_word = set()
     url_ids = dict()
@@ -455,15 +448,11 @@ def file_parser3(main_folder):
         f.write(str(document_count))
     f.close()
     # print(word_line)
->>>>>>> aa4dfc13af83a88c67135f5c36ec2186bf3a632d
 
 if __name__ == "__main__":
    #  file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/ANALYST")
    #  file_parser("C:/Users/Anthony Wen/Downloads/CS121_Assignment3/analyst/ANALYST")
     print(f"starting at: {start_time}")
-<<<<<<< HEAD
-    file_parser("C:/Users/thyva.000/cs121/a3-m1/CS121_Assignment3/TEMP")
-=======
    # Create threads for each file path
    #  thread1 = threading.Thread(target=file_parser, args=("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/DEV",))
     thread2 = threading.Thread(target=file_parser2, args=("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/DEV2",))
@@ -480,5 +469,4 @@ if __name__ == "__main__":
     # thread3.join()
 
 
->>>>>>> aa4dfc13af83a88c67135f5c36ec2186bf3a632d
     print("--- %s seconds ---" % (time.time() - start_time))
