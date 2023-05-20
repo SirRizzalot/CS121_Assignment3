@@ -20,7 +20,7 @@ import os
 import json
 from collections import defaultdict
 
-from PartA import tokenizeHTMLString, computeWordFrequencies
+from PartA import tokenizeHTMLString, computeWordPosition, computeWordFrequencies
 import string
 from sys import argv
 import time
@@ -358,7 +358,7 @@ def file_parser3(main_folder):
                         words = BeautifulSoup(data["content"], "lxml").text
 
                         words_list = tokenizeHTMLString(words)
-                        frequencies = computeWordFrequencies(words_list)
+                        position = computeWordPosition(words_list)
 
                         # hash the url
                         # url_id = hash(data["url"])
@@ -373,22 +373,20 @@ def file_parser3(main_folder):
                         special_case_frequencies = computeWordFrequencies(special_case_list)
 
                         url_info = urlWordInfo()
-                        for word, frequency in frequencies.items():
-                            url_info.addWordInfo(word, ["regular", frequency])
+                        for word, frequency in position.items():
+                            url_info.addWordInfo(word, ["regular", len(frequency), frequency])
 
                         for word, frequency in special_case_frequencies.items():
                             url_info.addWordInfo(word, ["special_case", frequency])
-
+                        print(url_info.getWordInfo().items())
                         for word, info in url_info.getWordInfo().items():
+
                             organized_info = ""
-                            position = set()
-                            for i in range(len(words_list)):
-                                if words_list[i] == word:
-                                    position.add(i)
                             if len(info) > 1:
-                                organized_info += f"{url_no},{info[0][1]},{info[1][1]}, {len(words_list)}, {position}"
+                                organized_info += f"{url_no},{info[0][1]},{info[1][1]},{len(words_list)},{info[0][2]}"
                             else:
-                                organized_info += f"{url_no},{info[0][1]},0,{len(words_list)}, {position}"
+
+                                organized_info += f"{url_no},{info[0][1]},0,{len(words_list)},{info[0][2]}"
                             unique_word.add(word)
                             word_url[word].append(organized_info)
 
@@ -455,18 +453,18 @@ if __name__ == "__main__":
     print(f"starting at: {start_time}")
    # Create threads for each file path
    #  thread1 = threading.Thread(target=file_parser, args=("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/DEV",))
-    thread2 = threading.Thread(target=file_parser2, args=("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/DEV2",))
-   #  thread3 = threading.Thread(target=file_parser3, args=("C:/Users/Lilan/Documents/CS121_Assignment3/DEV3",))
+   #  thread2 = threading.Thread(target=file_parser2, args=("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/",))
+    thread3 = threading.Thread(target=file_parser3, args=("C:/Users/Lilan/Documents/CS121_Assignment3/DEV2",))
 
     # Start the threads
     # thread1.start()
-    thread2.start()
-    # thread3.start()
+    # thread2.start()
+    thread3.start()
 
     # Wait for the threads to finish
     # thread1.join()
-    thread2.join()
-    # thread3.join()
+    # thread2.join()
+    thread3.join()
 
 
     print("--- %s seconds ---" % (time.time() - start_time))

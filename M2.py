@@ -3,6 +3,14 @@ from Query import *
 from Ranking import *
 import itertools  # for slicing dictionary
 
+
+######################################################################################################################
+# team members:
+# Aileen Tran aileenyt, 79192463
+# Anthony Wen awen5, 62858003
+# Van Pham vantp2, 74369428
+# Lance Li lancekl, 90653176
+######################################################################################################################
 if __name__ ==  "__main__":
     database = QueryDB()
     query1 = Query(database)

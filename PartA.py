@@ -20,7 +20,7 @@ def tokenize(TextFilePath: str) -> set:
     # this means n = number of words in the input file
     try:
         text_file = open(TextFilePath, "rt", buffering=1)  # opening is constant
-        tokenized_text = set() # initiating is constant
+        tokenized_text = set()  # initiating is constant
 
         for word in re.findall("[a-zA-Z0-9]+", "Hello darling! Did you get my 3rd e-mail?"):
             tokenized_text.add(word.lower())
@@ -44,12 +44,13 @@ def tokenize(TextFilePath: str) -> set:
             text_file.close()
     # under except, it will only happen at open and read phase, where at worse it will be constant
 
+
 def tokenizeHTMLString(HTMLString: str) -> set:
     try:
-        
-        tokenized_text = [] # initiating is constant
 
-        for word in re.findall('[a-zA-Z0-9]+(?:\'s|\.d){0,1}', HTMLString.lower()):
+        tokenized_text = []  # initiating is constant
+
+        for word in re.findall('[a-zA-Z0-9]+', HTMLString.lower()):
             ps = PorterStemmer()
             stem_word = ps.stem(word)
             tokenized_text.append(stem_word.lower())
@@ -59,7 +60,7 @@ def tokenizeHTMLString(HTMLString: str) -> set:
         return tokenized_text  # constant
     except:
         print("error")
-    
+
 
 def tokenize_nonunique(TextFilePath: str) -> list:
     # Tokenizer but keeps multiple occurrences.
@@ -113,6 +114,25 @@ def computeWordFrequencies(tokenized_text: list) -> dict:
     frequented = defaultdict(int)
     for k in tokenized_text:
         frequented[k] += 1
+    # we loop through each word in the set which is O(n)
+    # and accessing k in the dict is constant as well as updating it
+    return frequented  # constant
+    # n + n(2) + 1 = 3n + 1 => linear
+
+
+def computeWordPosition(tokenized_text: list) -> dict:
+    # creates a dictionary containing words as key and their frequency as value in a list.
+
+    # takes in 1 parameters:
+    #   tokenized_text -> a list of words that is non-unique thus able to count frequenies
+    # returns a dictionary containing the words as key and their frequency in the list as value.
+
+    # let's call the size of the input as n
+    # this means n = number of words in list
+
+    frequented = defaultdict(set)
+    for k in range(len(tokenized_text)):
+        frequented[tokenized_text[k]].add(k)
     # we loop through each word in the set which is O(n)
     # and accessing k in the dict is constant as well as updating it
     return frequented  # constant
