@@ -1,7 +1,7 @@
 from QueryObject import *
 from Query import *
 from Ranking import *
-
+import itertools  # for slicing dictionary
 
 if __name__ ==  "__main__":
     database = QueryDB()
@@ -22,7 +22,6 @@ if __name__ ==  "__main__":
     
     # get query tfidf score
     query_score = get_tf_idf_of_query_words(query1.query, query1)
-    print(query_score)
     #dictionary format of score of words in query for all urls having them
     # {
     #     url1: {score_w1, score_w2, score_w3},
@@ -46,11 +45,24 @@ if __name__ ==  "__main__":
                 all_doc_vector[url].append(0)
         
         
-    # the dictionary of doc-id score
+    # the dictionary of cosine similarities score for all docs containing at least 1 word in the query
     cos_sim_list = {}    
     for doc in all_doc_vector:
         cos_sim = compute_cosine_similarities(query_score, all_doc_vector[doc])
         cos_sim_list[doc] = cos_sim
         #print(f"{doc} : {cos_sim}")
     
-    print(cos_sim_list)
+    # sort the cosine similarities score dictionaries
+    cos_sim_list = sorturl(cos_sim_list)
+    
+    # take the top 5 urls
+    if len(cos_sim_list) >= 5:
+        top5 = dict(itertools.islice(cos_sim_list.items(), 5))
+    else:
+        top5 = cos_sim_list
+        
+    
+    # output the top 5 urls
+    for k,v in top5.items():
+        print(query1.parent.url_id_to_string[k])  
+    

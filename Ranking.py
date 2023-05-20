@@ -86,13 +86,13 @@ class Ranker:
                    self.score[doc_id] += document[1]
 
     
-    #sort the urls by score
-    def sorturl(self):
-        sorted_score = sorted(self.score.items(), key= lambda x:x[1], reverse = True)
-        self.score.clear()
-        for key,value in sorted_score:
-            self.score[key] = value
-        return self.score
+#sort the urls by score
+def sorturl(dict):
+    sorted_score = sorted(dict.items(), key= lambda x:x[1], reverse = True)
+    dict.clear()
+    for key,value in sorted_score:
+        dict[key] = value
+    return dict
 
 # calculate tf_idf score list for the query
 def get_tf_idf_of_query_words(queryWordList, data):

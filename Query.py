@@ -24,7 +24,7 @@ class Query(object):
         self.query = input("what you want to search?\n").lower().split()
         self.query = [stem.stem(i) for i in self.query]
         ordered = sorted(self.parent.get_location(self.query), key=lambda x: x[1])
-        print(ordered)
+        #print(ordered)
 
         self.no_show = {i for i in ordered if i[1] == 0}
         #print(self.no_show)
