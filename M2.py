@@ -5,16 +5,16 @@ from Ranking import *
 
 if __name__ ==  "__main__":
     database = QueryDB()
-    print(database.url_no)
     query1 = Query(database)
     query1.querying()
-    score_list = {}
+    
     # loop through all words in the query to get score set of all postings having that word
     # score_list has the form:
     # {
     #     word: {doc:score, doc:score, doc:score},
     #     word: {doc:score, doc:score}
     # }
+    score_list = {}
     for word in query1.query:
         word_rank = Ranker(word, query1)
         word_rank.getscore()
@@ -38,9 +38,6 @@ if __name__ ==  "__main__":
                 else:
                     all_doc_vector[url] = []
                     all_doc_vector[url].append(score_list[word][url])
-                #doc_score = get_tf_idf_of_a_doc(query_words, score_list, url)
-                #cos_sim = compute_cosine_similarities(query_score, doc_score)
-                #print(cos_sim)
 
     # add score 0 to words not appear in url but appears in query
     for url in all_doc_vector:
@@ -49,7 +46,11 @@ if __name__ ==  "__main__":
                 all_doc_vector[url].append(0)
         
         
+    # the dictionary of doc-id score
+    cos_sim_list = {}    
     for doc in all_doc_vector:
         cos_sim = compute_cosine_similarities(query_score, all_doc_vector[doc])
-        print(f"{doc} : {cos_sim}")
+        cos_sim_list[doc] = cos_sim
+        #print(f"{doc} : {cos_sim}")
     
+    print(cos_sim_list)

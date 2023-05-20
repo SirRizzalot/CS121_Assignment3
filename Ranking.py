@@ -96,10 +96,10 @@ class Ranker:
 
 # calculate tf_idf score list for the query
 def get_tf_idf_of_query_words(queryWordList, data):
+    print(data.word_info)
     query_score = []   # format: [word1_score, word2_score, word3_score]
     for word in queryWordList:
         if word not in data.word_info:  # data.word_info (look at word_info of Query class)
-            print("ohhh weird")
             query_score.append(0)
         else:
             # calculate tf
