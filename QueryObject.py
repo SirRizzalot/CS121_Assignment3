@@ -46,14 +46,15 @@ class QueryDB(object):
         data = defaultdict(list)
         # keys = text.split()
         with open('website_index.txt') as file:
-            counter = 0
+            counter = 1
             for word, location in list_of_location:
                 if location == 0:
                     continue
                 while counter < location:
-                    counter+=1
                     file.readline()
+                    counter += 1
                 line = file.readline()
+                counter += 1
                 line = line.strip()
                 key, value = line.split(': ')
                 value1 = value[1:-1].replace("'", "").split(", ")
