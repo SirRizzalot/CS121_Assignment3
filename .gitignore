@@ -160,6 +160,7 @@ cython_debug/
 ANALYST/
 DEV/
 *.txt
+*.csv
 *.PNG
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
