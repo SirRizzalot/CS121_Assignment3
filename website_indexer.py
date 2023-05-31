@@ -346,6 +346,7 @@ def file_parser3(main_folder):
         # read the sub folder and loop through all the files
         for file in os.listdir(folder):
             # checks the file has a json extension
+            print(file)
             try:
                 if file.endswith(".json"):
                     with open(os.path.join(folder, file), "r") as f:
@@ -377,8 +378,9 @@ def file_parser3(main_folder):
                             url_info.addWordInfo(word, ["regular", len(frequency), frequency])
 
                         for word, frequency in special_case_frequencies.items():
+                            if word not in url_info.getWordInfo():
+                                url_info.addWordInfo(word, ["regular", 0, set()])
                             url_info.addWordInfo(word, ["special_case", frequency])
-                        print(url_info.getWordInfo().items())
                         for word, info in url_info.getWordInfo().items():
 
                             organized_info = ""
@@ -454,7 +456,7 @@ if __name__ == "__main__":
    # Create threads for each file path
    #  thread1 = threading.Thread(target=file_parser, args=("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/DEV",))
    #  thread2 = threading.Thread(target=file_parser2, args=("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/",))
-    thread3 = threading.Thread(target=file_parser3, args=("C:/Users/Lilan/Documents/CS121_Assignment3/DEV2",))
+    thread3 = threading.Thread(target=file_parser3, args=("C:/Users/Lilan/Documents/CS121_Assignment3/DEV",))
 
     # Start the threads
     # thread1.start()
