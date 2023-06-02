@@ -83,7 +83,11 @@ if __name__ ==  "__main__":
     start6 = time.time() 
     # sort the cosine similarities score dictionaries
     cos_sim_list = sorturl(cos_sim_list)
+<<<<<<< HEAD
     #print("cos_sim_list", cos_sim_list)
+=======
+    # print("cos_sim_list", cos_sim_list)
+>>>>>>> 91d65c106ba5bc38e603eb6562413dbedf3dae40
     # take the top 5 urls
     if len(cos_sim_list) >= 5:
         top5 = dict(itertools.islice(cos_sim_list.items(), 5))

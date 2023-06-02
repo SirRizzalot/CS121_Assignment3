@@ -4,6 +4,7 @@ import ast
 from itertools import islice
 import time
 import pandas as pd
+import linecache
 
 
 csv.field_size_limit(2**31-1)
@@ -11,7 +12,8 @@ csv.field_size_limit(2**31-1)
 class QueryDB(object):
 
     def __init__(self):
-        self.id_to_index = self.load_datatxt()
+        # self.id_to_index = self.load_datatxt()
+        self.id_to_index = self.load_index_bytescsv()
         self.url_id_to_string = self.load_urlId()
         self.Queries = list()
         self.words_locations = dict()
@@ -31,6 +33,15 @@ class QueryDB(object):
     def load_datatxt(self):
         data = {}
         with open('word_index_locator.csv', newline='') as file:
+            reader = csv.reader(file)
+            for row in reader:
+                key, value = row[0], row[1]
+                data[key] = value
+        return data
+    
+    def load_index_bytescsv(self):
+        data = {}
+        with open('word_index_bytes.csv', newline='') as file:
             reader = csv.reader(file)
             for row in reader:
                 key, value = row[0], row[1]
@@ -68,21 +79,31 @@ class QueryDB(object):
                 key, value = row[0], row[1]
                 data[int(key)] = value
         return data
+    
+    # def seek_position(self, position):
+
 
     # function to load information from website_index.txt file
     # def load_websitetxt(self, list_of_location):
     #     data = defaultdict(list)
     #     start = time.time()
     #     # keys = text.split()
+    #     print("list_of_locaiton", list_of_location)
     #     with open('website_index.txt') as file:
     #         counter = 1
+
     #         for word, location in list_of_location:
     #             if location == 0:
     #                 continue
-    #             while counter < location:
-    #                 file.readline()
-    #                 counter += 1
+
+    #             loc = 18829411
+    #             file.seek(loc)
+    #             # while counter < location:
+    #             #     file.readline()
+    #             #     counter += 1
     #             line = file.readline()
+    #             print("line", line)
+    #             break
     #             counter += 1
     #             line = line.strip()
     #             key, value = line.split(': ')
@@ -95,20 +116,13 @@ class QueryDB(object):
                     
     #                 int_info = [int(x) for x in info]
     #                 data[key].append(int_info)
-    #     print(data)
-    #     # end = time.time()
-    #     # print("total time", end-start)
+    #     # print(data)
+    #     end = time.time()
+    #     print("total time for here", end-start)
     #     return data
 
 
-    # trying pandas
-    # def load_websitetxt(self, list_of_location):
-    #     start = time.time()
-    #     chunks = pd.read_csv('website_index.csv', chunksize=100000)
-    #     data = pd.concat(chunks)
-    #     end = time.time()
-    #     print("time", end-start)
-    #     print(data)
+   
 
     # function to load information from website_index.csv file
     # def load_websitetxt(self, list_of_location):
@@ -158,19 +172,34 @@ class QueryDB(object):
     def load_websitetxt(self, list_of_location):
         data = defaultdict(list)
         start = time.time()
+        print("list_of_location", list_of_location)
+        # current = 0
+
         with open('website_index.csv', newline='') as file:
-            reader = csv.reader(file)
-            counter = 1
+            # reader = csv.reader(file)
+            
+            
             for word, location in list_of_location:
                 if location == 0:
                     continue
-                while counter < location:
-                    next(reader)
-                    counter += 1
-                row = next(reader)
-                counter += 1
-                key, value = row[0], row[1]
-                value1 = value[1:-1].replace("'", "").split("}, ")
+                # while counter < location:
+                #     next(reader)
+                #     counter += 1
+                
+                file.seek(location)
+                # current = location
+
+                # row = next(reader)
+                row = file.readline()
+                # print("row", row)
+                # break
+                
+
+                
+                # print(row, type(row))
+                # print(row[len(word)+3:-3])
+                value1 = row[len(word)+3:-3].replace("'", "").split("}, ")
+                
                 for i in value1:
                     info = i.split(',{')
                     temp = info[0].split(",")
@@ -178,10 +207,11 @@ class QueryDB(object):
                     if temp[4] == 'set()':
                         while len(temp) > 0:
                             temp[0] = temp[0].lstrip()
-                            data[key].append(tuple(temp[:5]))    
+                            data[word].append(tuple(temp[:5]))    
                             temp = temp[5:]
                     else:
-                        data[key].append(tuple(temp))
+                        data[word].append(tuple(temp))
+                #     break
         end = time.time()
         print("parsing time", end-start)
         # print(data)
