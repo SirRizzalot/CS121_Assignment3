@@ -30,18 +30,18 @@ class QueryDB(object):
     #     return data
     
     # function to load information from word_index_locator.csv file
-    def load_datatxt(self):
-        data = {}
-        with open('word_index_locator.csv', newline='') as file:
-            reader = csv.reader(file)
-            for row in reader:
-                key, value = row[0], row[1]
-                data[key] = value
-        return data
+    # def load_datatxt(self):
+    #     data = {}
+    #     with open('word_index_locator.csv', newline='') as file:
+    #         reader = csv.reader(file)
+    #         for row in reader:
+    #             key, value = row[0], row[1]
+    #             data[key] = value
+    #     return data
     
     def load_index_bytescsv(self):
         data = {}
-        with open('word_index_bytes.csv', newline='') as file:
+        with open('tfidf_index_locator.csv', newline='') as file:
             reader = csv.reader(file)
             for row in reader:
                 key, value = row[0], row[1]
@@ -169,35 +169,57 @@ class QueryDB(object):
     #     print("parsing time", end-start)
     #     return data
 
-    def load_websitetxt(self, list_of_location):
+    def load_tfidf_index(self, list_of_location):
         data = defaultdict(list)
         start = time.time()
-        print("list_of_location", list_of_location)
-        # current = 0
 
-        with open('website_index.csv', newline='') as file:
-            # reader = csv.reader(file)
-            
-            
+        with open('tfidf_index.csv', newline='') as file: 
             for word, location in list_of_location:
                 if location == 0:
                     continue
-                # while counter < location:
-                #     next(reader)
-                #     counter += 1
-                
                 file.seek(location)
-                # current = location
-
-                # row = next(reader)
                 row = file.readline()
                 # print("row", row)
-                # break
-                
 
+                value1 = row[len(word)+3:-4].replace("'", "").split("), ")
+                the_word = row[:len(word)+1]
+                # print("value1", value1)
                 
-                # print(row, type(row))
-                # print(row[len(word)+3:-3])
+                
+                for i in value1:
+                    info = i.split(', ')
+                    # print("info", info)
+                    
+                    word = info[0]
+                    word = word[1:]
+                    temp = []
+                    temp.append(int(word))
+                    if info[1].endswith(")"):
+                        word = info[1]
+                        word = word[:-1]
+                        temp.append(float(word))
+                    else:
+                        temp.append(float(info[1]))
+                    # print("temp", temp)
+                    data[the_word].append(tuple(temp))
+        end = time.time()
+        print("parsing time", end-start)
+        # print("data", data)
+        return data
+
+    
+
+    def load_websitetxt(self, list_of_location):
+        data = defaultdict(list)
+        start = time.time()
+
+        with open('website_index.csv', newline='') as file: 
+            for word, location in list_of_location:
+                if location == 0:
+                    continue
+                file.seek(location)
+                row = file.readline()
+
                 value1 = row[len(word)+3:-3].replace("'", "").split("}, ")
                 
                 for i in value1:
@@ -211,10 +233,8 @@ class QueryDB(object):
                             temp = temp[5:]
                     else:
                         data[word].append(tuple(temp))
-                #     break
         end = time.time()
         print("parsing time", end-start)
-        # print(data)
         return data
 
     def get_urls(self, data):

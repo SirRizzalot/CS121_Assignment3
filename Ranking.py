@@ -113,7 +113,11 @@ def sorturl(dict):
 
 # calculate tf_idf score list for the query
 def get_tf_idf_of_query_words(queryWordList, data):
+<<<<<<< HEAD
     #print(data.word_info)
+=======
+    # print(data.word_info)
+>>>>>>> 94a1bc2efd82e6d1e0ef34d4231633a60394de8f
     query_score = []   # format: [word1_score, word2_score, word3_score]
     for word in queryWordList:
         if word not in data.word_info:  # data.word_info (look at word_info of Query class)
