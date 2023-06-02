@@ -18,17 +18,23 @@ if __name__ ==  "__main__":
     query1.querying()
     
     # loop through all words in the query to get score set of all postings having that word
-    # score_list has the form:
+    # score_list and special_score_list has the form:
     # {
     #     word: {doc:score, doc:score, doc:score},
     #     word: {doc:score, doc:score}
     # }
     start = time.time()
-    score_list = {}
+    score_list = {}  # tfidf scores
+    special_score_list = {}  # special case scores
+    
     for word in query1.query:
         word_rank = Ranker(word, query1)
+        # get tfidf score
         word_rank.getscore()
         score_list[word] = word_rank.score
+        # get special score
+        word_rank.get_special_score()
+        special_score_list[word] = word_rank.special_score
     
     # get query tfidf score
     query_score = get_tf_idf_of_query_words(query1.query, query1)
@@ -60,9 +66,14 @@ if __name__ ==  "__main__":
     for doc in all_doc_vector:
         cos_sim = compute_cosine_similarities(query_score, all_doc_vector[doc])
         cos_sim_list[doc] = -cos_sim
-        # print(f"{doc} : {cos_sim}")
-    
-    # print("LIST")
+     
+     
+    # add special word cases to score after calculating cosine similarities   
+    for word in special_score_list:
+        for url, special_score in special_score_list[word].items():
+            cos_sim_list[url] += special_score
+        
+        
     # sort the cosine similarities score dictionaries
     cos_sim_list = sorturl(cos_sim_list)
     # print("cos_sim_list", cos_sim_list)
