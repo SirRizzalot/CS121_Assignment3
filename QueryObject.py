@@ -182,7 +182,7 @@ class QueryDB(object):
                 # print("row", row)
 
                 value1 = row[len(word)+3:-4].replace("'", "").split("), ")
-                the_word = row[:len(word)+1]
+                the_word = row[:len(word)]
                 # print("value1", value1)
                 
                 

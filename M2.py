@@ -25,7 +25,6 @@ if __name__ ==  "__main__":
     # }
     start = time.time()
     score_list = {}  # tfidf scores
-    special_score_list = {}  # special case scores
     #dictionary format of score of words in query for all urls having them
     # {
     #     url1: {score_w1, score_w2, score_w3},
@@ -39,32 +38,19 @@ if __name__ ==  "__main__":
     for word in query1.query:
         word_rank = Ranker(word, query1)
         # get tfidf score
-        word_rank.getscore()
-        score_list[word] = word_rank.score
-        # get special score
-        word_rank.get_special_score()
-        special_score_list[word] = word_rank.special_score
+        word_rank.getTFIDF()
+        score_list[word] = word_rank.tfidf_score
         
         # make top_score_list and top_special_score_list to get top urls with highest score     
-        if len(score_list[word]) >= 10:
+        if len(score_list[word]) >= 20:
             sorted_dict = dict(sorted(score_list[word].items(), key=lambda x: x[1], reverse=True))
-            top_score_list = dict(list(sorted_dict.items())[:10])
+            top_score_list = dict(list(sorted_dict.items())[:20])
         else:
             top_score_list = score_list[word]
             
-        if len(special_score_list[word]) >= 10:
-            sorted_dict = dict(sorted(special_score_list[word].items(), key=lambda x: x[1], reverse=True))
-            top_special_score_list = dict(list(sorted_dict.items())[:10])
-        else:
-            top_special_score_list = special_score_list[word]
-
         #make top_urls to combine top_score_list and top_special_score_list
         for url, score in top_score_list.items():
             top_urls[url] = score
-
-        for url, score in top_special_score_list.items():
-            if url not in top_urls:
-                top_urls[url] = score
                 
         
         for url in top_urls:
@@ -79,28 +65,12 @@ if __name__ ==  "__main__":
     # get query tfidf score
     query_score = get_tf_idf_of_query_words(query1.query, query1)
     end3 = time.time()
-    # # #dictionary format of score of words in query for all urls having them
-    # # # {
-    # # #     url1: {score_w1, score_w2, score_w3},
-    # # #     url2: {score_w1, score_w2, score_w3},
-    # # #     url3: {score_w1, score_w2, score_w3},
-    # # # }
-    # all_doc_vector = {}
-    # for word in query1.query:
-    #     for url in query1.parent.url_id_to_string:
-    #         if url in score_list[word]:
-    #             if url in all_doc_vector:
-    #                 all_doc_vector[url].append(score_list[word][url])
-    #             else:
-    #                 all_doc_vector[url] = []
-    #                 all_doc_vector[url].append(score_list[word][url])
     
     # add score 0 to words not appear in url but appears in query
     for url in all_doc_vector:
         if len(all_doc_vector[url]) < len(query1.query):
             for i in range(len(query1.query) - len(all_doc_vector[url])):
                 all_doc_vector[url].append(0)
-      
         
     start4 = time.time()
     # # take the top 5 urls
@@ -117,14 +87,7 @@ if __name__ ==  "__main__":
         cos_sim = compute_cosine_similarities(query_score, all_doc_vector[doc])
         cos_sim_list[doc] = cos_sim
     end4 = time.time()
-
-    start5 = time.time()
-    # add special word cases to score after calculating cosine similarities   
-    for word in special_score_list:
-        for url, special_score in special_score_list[word].items():
-            if url in top_urls:
-                cos_sim_list[url] += special_score  
-    end5 = time.time()    
+      
        
     start6 = time.time() 
     # sort the cosine similarities score dictionaries
@@ -146,5 +109,4 @@ if __name__ ==  "__main__":
     print("time do word_rank", end2 - start2)
     print("time calculate tfidf of query", end3 - start3)
     print("time calculate cosine", end4 - start4)
-    print("time add extra weight", end5 - start5)
     print("time sort", end6 - start6)

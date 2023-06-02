@@ -34,73 +34,92 @@ class Ranker:
         self.score = {} # {url1:score1, url2:score2,....}
         self.special_score = {} # {url1:specialscore1, url2:specialscore2,...} - special score is 0 if the word is not of special case
     
-    # a function to calculate idf for a word
-    # receive a posting list of a single word and calculate idf score for that word
-    # notice that IDF score is typically shared among all postings of the same word in the inverted index.
-    def calculateIDF(self):     
-        document_frequency = len(self.posting) # no of document the word appears
-        idf_score = math.log10(self.url_no / document_frequency)
-        return idf_score
-        
-    # a function to calculate tf for all postings of a word
-    # receive a posting list of a single word and calculate tf score for all postings of that word
-    def calculateTF(self):
-        tf_scores = {}
-        for document in self.posting:
-            doc_id = int(document[0])
-            term_frequency = int(document[1])
-            word_count = int(document[3])
-            # check if values are valid for doing log
-            if term_frequency != 0 and word_count != 0:
-                tf_scores[doc_id] = 1 + math.log10(term_frequency / word_count)  # right formular will be 1 + math.log(tf / word_count)
-            else:
-                tf_scores[doc_id] = 0
-        return tf_scores
-    
-    def calculateTFIDF(self):
-        # check if the word is in the index
-        if self.word in self.word_info:
-            idf_score = self.calculateIDF()
-            tf_scores = self.calculateTF()
-            tfidf_scores = {}
-            for document in self.posting:
-                doc_id = int(document[0])
-                doc_tf = tf_scores[doc_id]
-                doc_score = doc_tf * idf_score
-                tfidf_scores[doc_id] = -doc_score
-                
             
-            #return tfidf_scores 
-            self.tfidf_score = tfidf_scores
+    # # a function to calculate idf for a word
+    # # receive a posting list of a single word and calculate idf score for that word
+    # # notice that IDF score is typically shared among all postings of the same word in the inverted index.
+    # def calculateIDF(self):     
+    #     document_frequency = len(self.posting) # no of document the word appears
+    #     idf_score = math.log10(self.url_no / document_frequency)
+    #     return idf_score
+        
+    # # a function to calculate tf for all postings of a word
+    # # receive a posting list of a single word and calculate tf score for all postings of that word
+    # def calculateTF(self):
+    #     tf_scores = {}
+    #     for document in self.posting:
+    #         doc_id = int(document[0])
+    #         term_frequency = int(document[1])
+    #         word_count = int(document[3])
+    #         # check if values are valid for doing log
+    #         if term_frequency != 0 and word_count != 0:
+    #             tf_scores[doc_id] = 1 + math.log10(term_frequency / word_count)  # right formular will be 1 + math.log(tf / word_count)
+    #         else:
+    #             tf_scores[doc_id] = 0
+    #     return tf_scores
+    
+    # def calculateTFIDF(self):
+    #     # check if the word is in the index
+    #     if self.word in self.word_info:
+    #         idf_score = self.calculateIDF()
+    #         tf_scores = self.calculateTF()
+    #         tfidf_scores = {}
+    #         for document in self.posting:
+    #             doc_id = int(document[0])
+    #             doc_tf = tf_scores[doc_id]
+    #             doc_score = doc_tf * idf_score
+    #             tfidf_scores[doc_id] = -doc_score
+    #         #return tfidf_scores 
+    #         self.tfidf_score = tfidf_scores
+    #     else:
+    #         # if word is not in the index, self.tfidf score of the word will be 0
+    #         self.tfidf_score = 0
+    def getTFIDF(self):
+        if self.word in self.word_info:
+            for document in self.posting:
+                doc_id = int(document[0])      
+                score = float(document[1])
+                self.tfidf_score[doc_id] = -score     
         else:
             # if word is not in the index, self.tfidf score of the word will be 0
             self.tfidf_score = 0
             
-    # posting is the array of posting for a word
-    # needs to call self.calculateTFIDF() to get the dict of tfidf score of all postings of the word
-    def getscore(self):
-        # check if the word is in the index
-        if self.word in self.word_info:          
-            # calculate tfidf scores
-            self.calculateTFIDF() 
-            for document in self.posting:
-                doc_id = int(document[0])
-                #get document tf-idf value
-                self.score[doc_id] = self.tfidf_score[doc_id]
-                # if the special_frequency is not 0 (means the word appears at special case in the doc)
-                # add extra weight to the score 
-                # if int(document[2]) > 0:
-                #    self.score[doc_id] += int(document[2])
+    # def getscore(self):
+    #     # check if the word is in the index
+    #     if self.word in self.word_info:
+    #         #get TFIDF scores            
+    #         self.getTFIDF() 
+    #         print(self.tfidf_score) 
+    #         for document in self.posting:
+    #             doc_id = int(document[0])    
+    #             # get document tf-idf value
+    #             self.score[doc_id] = self.tfidf_score[doc_id]
+        
+    # # posting is the array of posting for a word
+    # # needs to call self.calculateTFIDF() to get the dict of tfidf score of all postings of the word
+    # def getscore(self):
+    #     # check if the word is in the index
+    #     if self.word in self.word_info:          
+    #         # calculate tfidf scores
+    #         self.calculateTFIDF() 
+    #         for document in self.posting:
+    #             doc_id = int(document[0])
+    #             #get document tf-idf value
+    #             self.score[doc_id] = self.tfidf_score[doc_id]
+    #             # if the special_frequency is not 0 (means the word appears at special case in the doc)
+    #             # add extra weight to the score 
+    #             # if int(document[2]) > 0:
+    #             #    self.score[doc_id] += int(document[2])
 
-    def get_special_score(self):
-        if self.word in self.word_info:
-            for document in self.posting:
-                doc_id = int(document[0])
-                if int(document[2]) > 0:
-                    special_score = math.log10(int(document[2]))
-                else:
-                    special_score = 0
-                self.special_score[doc_id] = special_score
+    # def get_special_score(self):
+    #     if self.word in self.word_info:
+    #         for document in self.posting:
+    #             doc_id = int(document[0])
+    #             if int(document[2]) > 0:
+    #                 special_score = math.log10(int(document[2]))
+    #             else:
+    #                 special_score = 0
+    #             self.special_score[doc_id] = special_score
         
      
 #sort the urls by score
@@ -113,11 +132,6 @@ def sorturl(dict):
 
 # calculate tf_idf score list for the query
 def get_tf_idf_of_query_words(queryWordList, data):
-<<<<<<< HEAD
-    #print(data.word_info)
-=======
-    # print(data.word_info)
->>>>>>> 94a1bc2efd82e6d1e0ef34d4231633a60394de8f
     query_score = []   # format: [word1_score, word2_score, word3_score]
     for word in queryWordList:
         if word not in data.word_info:  # data.word_info (look at word_info of Query class)
