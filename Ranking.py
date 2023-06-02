@@ -8,8 +8,10 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from PartA import tokenizeHTMLString
 from collections import defaultdict
 import math
+import numpy
 from numpy import dot
 from numpy.linalg import norm
+from scipy.special import logsumexp
 
 # # retrieve data from index files
 # # for now, website_data: 
@@ -132,23 +134,13 @@ def get_tf_idf_of_query_words(queryWordList, data):
             query_score.append(tfidf_score)
     return query_score
  
-#after having score_list
-# receive a list of query words and score_list of ALL DOCS for ALL WORDS IN THE QUERY
-# make a list for score of ONE DOC containing ALL WORDS IN THE QUERY  
-# def get_tf_idf_of_a_doc(query_words, score_list, doc_id):
-#     doc_score = set() # format: doc = (score_w1, score_w2, score_w3)
-#     for word in query_words:
-#         if word not in score_list:
-#             doc_score.add(0)
-#         else:
-#             word_score = score_list[word][doc_id]
-#             print(word_score)
-#             doc_score.add(word_score)
-#     return doc_score
             
 #compute cosine similarities
 def compute_cosine_similarities(query_score, document_score):
-    cos_sim = dot(query_score, document_score)/(norm(query_score)*norm(document_score))
-    return cos_sim
+    if numpy.count_nonzero(query_score) == 0 or numpy.count_nonzero(document_score) == 0:
+        return 0.0
+    else:
+        cos_sim = dot(query_score, document_score)/(norm(query_score)*norm(document_score))
+        return cos_sim
 
    
