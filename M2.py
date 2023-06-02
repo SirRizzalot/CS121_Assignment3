@@ -45,19 +45,34 @@ if __name__ ==  "__main__":
         word_rank.get_special_score()
         special_score_list[word] = word_rank.special_score
         
-        # if url contains the special word, add it to top_urls
-        for url, score in special_score_list[word].items():
-            if score > 0:
+        # make top_score_list and top_special_score_list to get top urls with highest score     
+        if len(score_list[word]) >= 10:
+            sorted_dict = dict(sorted(score_list[word].items(), key=lambda x: x[1], reverse=True))
+            top_score_list = dict(list(sorted_dict.items())[:10])
+        else:
+            top_score_list = score_list[word]
+            
+        if len(special_score_list[word]) >= 10:
+            sorted_dict = dict(sorted(special_score_list[word].items(), key=lambda x: x[1], reverse=True))
+            top_special_score_list = dict(list(sorted_dict.items())[:10])
+        else:
+            top_special_score_list = special_score_list[word]
+
+        #make top_urls to combine top_score_list and top_special_score_list
+        for url, score in top_score_list.items():
+            top_urls[url] = score
+
+        for url, score in top_special_score_list.items():
+            if url not in top_urls:
                 top_urls[url] = score
                 
-        for url in word_rank.posting:
-            url = int(url[0])
-
+        
+        for url in top_urls:
             if url in all_doc_vector:
-                all_doc_vector[url].append(score_list[word][url])
+                all_doc_vector[url].append(top_urls[url])
             else:
                 all_doc_vector[url] = []
-                all_doc_vector[url].append(score_list[word][url])
+                all_doc_vector[url].append(top_urls[url])
     end2 = time.time()
     
     start3 = time.time()
@@ -88,18 +103,21 @@ if __name__ ==  "__main__":
       
         
     start4 = time.time()
-    # take the top 5 urls
-    if len(top_urls) >= 10:
-        top_urls = dict(itertools.islice(top_urls.items(), 10))
-    else:
-        top_urls = top_urls
+    # # take the top 5 urls
+    # if len(top_urls) >= 10:
+    #     top_urls = dict(itertools.islice(top_urls.items(), 10))
+    # else:
+    #     top_urls = top_urls
     # the dictionary of cosine similarities score for all docs containing at least 1 word in the query
     cos_sim_list = {}    
+    count = 0
     for doc in top_urls:
+        print(count)
+        count += 1
         cos_sim = compute_cosine_similarities(query_score, all_doc_vector[doc])
-        cos_sim_list[doc] = -cos_sim
+        cos_sim_list[doc] = cos_sim
     end4 = time.time()
-    
+
     start5 = time.time()
     # add special word cases to score after calculating cosine similarities   
     for word in special_score_list:

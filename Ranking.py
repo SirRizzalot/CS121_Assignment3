@@ -67,7 +67,7 @@ class Ranker:
                 doc_id = int(document[0])
                 doc_tf = tf_scores[doc_id]
                 doc_score = doc_tf * idf_score
-                tfidf_scores[doc_id] = doc_score
+                tfidf_scores[doc_id] = -doc_score
                 
             
             #return tfidf_scores 
@@ -113,7 +113,7 @@ def sorturl(dict):
 
 # calculate tf_idf score list for the query
 def get_tf_idf_of_query_words(queryWordList, data):
-    print(data.word_info)
+    #print(data.word_info)
     query_score = []   # format: [word1_score, word2_score, word3_score]
     for word in queryWordList:
         if word not in data.word_info:  # data.word_info (look at word_info of Query class)
@@ -121,7 +121,7 @@ def get_tf_idf_of_query_words(queryWordList, data):
         else:
             # calculate tf
             word_frequency = queryWordList.count(word)
-            tf_score = 1 + math.log(word_frequency / len(queryWordList))
+            tf_score = 1 + math.log10(word_frequency / len(queryWordList))
             
             # calculate idf
             document_frequency = len(data.word_info[word]) # no of document the word appears
@@ -133,8 +133,7 @@ def get_tf_idf_of_query_words(queryWordList, data):
             # add current word score the query_score list
             query_score.append(tfidf_score)
     return query_score
- 
-            
+
 #compute cosine similarities
 def compute_cosine_similarities(query_score, document_score):
     if numpy.count_nonzero(query_score) == 0 or numpy.count_nonzero(document_score) == 0:
