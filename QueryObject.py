@@ -153,11 +153,34 @@ class QueryDB(object):
                     
                     temp = list(map(int,info[0].split(",")))
                     temp.append(set(info[1:]))
-                    
+                    temp2 = []
+                    for i in temp[:len(temp)-1]:
+                        # print(i, type(i))
+                        temp2.append(int(i))
+                    # print(temp[len(temp)-1], type(temp[len(temp)-1]))
+
+                    # temp2.append(set(map(int,temp[len(temp)-1])))
+
+                    temp3 = set()
+                    for i in temp[len(temp)-1]:
+                        val = i.split(', ')
+                        # print("val", val)
+                        for j in val:
+                            if j.endswith('}'):
+                                temp3.add(int(j[:len(j)-1]))
+                            else:
+                                temp3.add(int(j))
+
+                    temp2.append(temp3)
+                    # temp2.append(temp[len(temp)-1])
+
+                    # print(temp2)
+                    # return data
+                
                     # print(tuple_info, type(tuple_info), info, type(info))
                     
-                    data[key].append(tuple(temp))
-        print(data)
+                    data[key].append(tuple(temp2))
+        # print(data)
         return data
 
 
