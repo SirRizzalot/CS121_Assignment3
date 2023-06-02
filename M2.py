@@ -74,6 +74,7 @@ if __name__ ==  "__main__":
             cos_sim_list[url] += special_score
         
         
+    co_start = time.time()
     # sort the cosine similarities score dictionaries
     cos_sim_list = sorturl(cos_sim_list)
     # print("cos_sim_list", cos_sim_list)
@@ -83,6 +84,8 @@ if __name__ ==  "__main__":
     else:
         top5 = cos_sim_list
         
+    co_end = time.time()
+    print("cosine time", co_end-co_start)
     
     # output the top 5 urls
     for k,v in top5.items():
