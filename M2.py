@@ -2,7 +2,7 @@ from QueryObject import *
 from Query import *
 from Ranking import *
 import itertools  # for slicing dictionary
-
+import time
 
 ######################################################################################################################
 # team members:
@@ -22,6 +22,7 @@ if __name__ ==  "__main__":
     #     word: {doc:score, doc:score, doc:score},
     #     word: {doc:score, doc:score}
     # }
+    start = time.time()
     score_list = {}
     for word in query1.query:
         word_rank = Ranker(word, query1)
@@ -60,6 +61,8 @@ if __name__ ==  "__main__":
         cos_sim_list[doc] = cos_sim
         #print(f"{doc} : {cos_sim}")
     
+    print("LIST")
+    print(cos_sim_list)
     # sort the cosine similarities score dictionaries
     cos_sim_list = sorturl(cos_sim_list)
     
@@ -73,4 +76,5 @@ if __name__ ==  "__main__":
     # output the top 5 urls
     for k,v in top5.items():
         print(query1.parent.url_id_to_string[k])  
-    
+    end = time.time()
+    print(end - start)

@@ -5,7 +5,7 @@
 ############################################################
 from collections import defaultdict
 from nltk.stem import PorterStemmer
-
+import time
 
 
 class Query(object):
@@ -28,7 +28,11 @@ class Query(object):
 
         self.no_show = {i for i in ordered if i[1] == 0}
         #print(self.no_show)
+        
+        start = time.time()
         self.word_info = self.parent.load_websitetxt(ordered)
+        end = time.time()
+        print(end - start)
         #print(self.word_info)
         #print(self.word_info.items())
         # score_list = {}
