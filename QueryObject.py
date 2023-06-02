@@ -151,7 +151,7 @@ class QueryDB(object):
                     #     print("x", x)
 
                     
-                    temp = info[0].split(",")
+                    temp = list(map(int,info[0].split(",")))
                     temp.append(set(info[1:]))
                     
                     # print(tuple_info, type(tuple_info), info, type(info))

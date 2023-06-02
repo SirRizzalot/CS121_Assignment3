@@ -44,7 +44,7 @@ class Ranker:
     def calculateTF(self):
         tf_scores = {}
         for document in self.posting:
-            doc_id = document[2]
+            doc_id = document[should be 0]
             term_frequency = document[0]
             tf_scores[doc_id] = 1 + math.log(term_frequency)  # right formular will be 1 + math.log(tf / word_count)
     
@@ -57,7 +57,7 @@ class Ranker:
             tf_scores = self.calculateTF()
             tfidf_scores = {}
             for document in self.posting:
-                doc_id = document[2]
+                doc_id = document[should be 0]
                 doc_tf = tf_scores[doc_id]
                 doc_score = doc_tf * idf_score
                 tfidf_scores[doc_id] = doc_score
@@ -77,7 +77,7 @@ class Ranker:
             # calculate tfidf scores
             self.calculateTFIDF() 
             for document in self.posting:
-                doc_id = document[2]
+                doc_id = document[should be 0]
                 #get document tf-idf value
                 self.score[doc_id] = self.tfidf_score[doc_id]
                 # if the special_frequency is not 0 (means the word appears at special case in the doc)
