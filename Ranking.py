@@ -30,13 +30,14 @@ class Ranker:
             self.posting = self.word_info[word] # list of all postings of the word
         self.tfidf_score = {}
         self.score = {} # {url1:score1, url2:score2,....}
+        self.special_score = {} # {url1:specialscore1, url2:specialscore2,...} - special score is 0 if the word is not of special case
     
     # a function to calculate idf for a word
     # receive a posting list of a single word and calculate idf score for that word
     # notice that IDF score is typically shared among all postings of the same word in the inverted index.
     def calculateIDF(self):     
         document_frequency = len(self.posting) # no of document the word appears
-        idf_score = math.log(self.url_no / document_frequency)
+        idf_score = math.log10(self.url_no / document_frequency)
         return idf_score
         
     # a function to calculate tf for all postings of a word
@@ -49,7 +50,7 @@ class Ranker:
             word_count = int(document[3])
             # check if values are valid for doing log
             if term_frequency != 0 and word_count != 0:
-                tf_scores[doc_id] = 1 + math.log(term_frequency / word_count)  # right formular will be 1 + math.log(tf / word_count)
+                tf_scores[doc_id] = 1 + math.log10(term_frequency / word_count)  # right formular will be 1 + math.log(tf / word_count)
             else:
                 tf_scores[doc_id] = 0
         return tf_scores
@@ -86,10 +87,20 @@ class Ranker:
                 self.score[doc_id] = self.tfidf_score[doc_id]
                 # if the special_frequency is not 0 (means the word appears at special case in the doc)
                 # add extra weight to the score 
-                if int(document[2]) > 0:
-                   self.score[doc_id] += int(document[2])
+                # if int(document[2]) > 0:
+                #    self.score[doc_id] += int(document[2])
 
-    
+    def get_special_score(self):
+        if self.word in self.word_info:
+            for document in self.posting:
+                doc_id = int(document[0])
+                if int(document[2]) > 0:
+                    special_score = math.log10(int(document[2]))
+                else:
+                    special_score = 0
+                self.special_score[doc_id] = special_score
+        
+     
 #sort the urls by score
 def sorturl(dict):
     sorted_score = sorted(dict.items(), key= lambda x:x[1], reverse = True)
@@ -112,7 +123,7 @@ def get_tf_idf_of_query_words(queryWordList, data):
             
             # calculate idf
             document_frequency = len(data.word_info[word]) # no of document the word appears
-            idf_score = math.log(int(data.parent.url_no) / document_frequency)    # data.parent.url_no (look at url_no of QueryObject class)
+            idf_score = math.log10(int(data.parent.url_no) / document_frequency)    # data.parent.url_no (look at url_no of QueryObject class)
 
             # calculate tf idf
             tfidf_score = tf_score * idf_score
