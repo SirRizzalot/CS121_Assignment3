@@ -150,6 +150,7 @@ class QueryDB(object):
                     # for x in info:
                     #     print("x", x)
 
+                    
                     temp = info[0].split(",")
                     temp.append(set(info[1:]))
                     
@@ -177,5 +178,4 @@ class QueryDB(object):
             urls.append(url_data[num])
 
         return urls
-
 
