@@ -214,7 +214,7 @@ class QueryDB(object):
                 #     break
         end = time.time()
         print("parsing time", end-start)
-        print(data)
+        # print(data)
         return data
 
     def get_urls(self, data):
