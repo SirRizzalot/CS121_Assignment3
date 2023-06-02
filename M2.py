@@ -59,12 +59,12 @@ if __name__ ==  "__main__":
     for doc in all_doc_vector:
         cos_sim = compute_cosine_similarities(query_score, all_doc_vector[doc])
         cos_sim_list[doc] = -cos_sim
-        #print(f"{doc} : {cos_sim}")
+        # print(f"{doc} : {cos_sim}")
     
     # print("LIST")
     # sort the cosine similarities score dictionaries
     cos_sim_list = sorturl(cos_sim_list)
-    # print(cos_sim_list)
+    print("cos_sim_list", cos_sim_list)
     # take the top 5 urls
     if len(cos_sim_list) >= 5:
         top5 = dict(itertools.islice(cos_sim_list.items(), 5))
