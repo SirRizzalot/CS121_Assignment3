@@ -21,7 +21,7 @@ class Query(object):
 
     def querying(self):
         stem = PorterStemmer()
-        self.query = input("what you want to search?\n").lower().split()
+        self.query = input("what do you want to search?\n").lower().split()
         self.query = [stem.stem(i) for i in self.query]
         ordered = sorted(self.parent.get_location(self.query), key=lambda x: x[1])
         #print(ordered)
@@ -32,7 +32,7 @@ class Query(object):
         start = time.time()
         self.word_info = self.parent.load_websitetxt(ordered)
         end = time.time()
-        print(end - start)
+        print("loading word_site.csv", end - start)
         #print(self.word_info)
         #print(self.word_info.items())
         # score_list = {}

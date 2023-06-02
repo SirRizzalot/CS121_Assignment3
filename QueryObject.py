@@ -1,6 +1,8 @@
 from collections import defaultdict
 import csv
 import ast
+from itertools import islice
+import time
 
 csv.field_size_limit(2**31-1)
 
@@ -96,70 +98,73 @@ class QueryDB(object):
     # function to load information from website_index.csv file
     def load_websitetxt(self, list_of_location):
         data = defaultdict(list)
-        # data = defaultdict(set)
-        # data = defaultdict(tuple)
 
-        # temp_set = set()
-        # temp_set.add(32)
-        # temp_set.add(50)
-        # temp_set.add(87)
-        # print(temp_set)
-        # return data
+        start = time.time()
 
         with open('website_index.csv', newline='') as file:
             reader = csv.reader(file)
-            counter = 1
             for word, location in list_of_location:
                 if location == 0:
                     continue
-                while counter < location:
-                    next(reader)
-                    counter += 1
-                row = next(reader)
-                counter += 1
-                key, value = row[0], row[1]
-                # value2 = value.strip('[]"')
-                # value3 = value2.split(", ")
-                
 
-                # print("value", value, type(value))
-                # for i in value2:
-                #     print(i)
-                # return data
+                # Move to the desired line using islice
+                reader = islice(reader, location - 1, None)
 
+                try:
+                    row = next(reader)
+                    key, value = row[0], row[1]
+                    value1 = value[1:-1].replace("'", "").split("}, ")
 
-                # Convert the list of elements into a set of tuples
+                    for i in value1:
+                        info = i.split(',{')
+                        temp = info[0].split(",")
+                        temp.append(set(info[1:]))
 
-                
-
-                value1 = value[1:-1].replace("'", "").split("}, ")
-                # print("value1", value1)
-                for i in value1:
-                    
-                    # print("tuple(i)", tuple(i), type(tuple(i)))
-                    info = i.split(',{')
-                    # print(counter, info)
-                    # for x in info:
-                    #     print(x, type(x))
-
-                    # int_info = [int(x) for x in info]
-                    # print("info", info, type(info))
-                    
-                    # print("tuple_temp", tuple_temp)
-                
-                    # for x in info:
-                    #     print("x", x)
-
-                    
-                    temp = info[0].split(",")
-                    temp.append(set(info[1:]))
-                    
-                    # print(tuple_info, type(tuple_info), info, type(info))
-                    
-                    data[key].append(tuple(temp))
-        print(data)
+                        if temp[4] == 'set()':
+                            while len(temp) > 0:
+                                temp[0] = temp[0].lstrip()
+                                data[key].append(tuple(temp[:5]))
+                                temp = temp[5:]
+                        else:
+                            data[key].append(tuple(temp))
+                except StopIteration:
+                    # Handle the case when there are no more lines to read
+                    break
+        # print(data)
+        end = time.time()
+        print("parsing time", end-start)
         return data
 
+    # def load_websitetxt(self, list_of_location):
+    #     data = defaultdict(list)
+    #     start = time.time()
+    #     with open('website_index.csv', newline='') as file:
+    #         reader = csv.reader(file)
+    #         counter = 1
+    #         for word, location in list_of_location:
+    #             if location == 0:
+    #                 continue
+    #             while counter < location:
+    #                 next(reader)
+    #                 counter += 1
+    #             row = next(reader)
+    #             counter += 1
+    #             key, value = row[0], row[1]
+    #             value1 = value[1:-1].replace("'", "").split("}, ")
+    #             for i in value1:
+    #                 info = i.split(',{')
+    #                 temp = info[0].split(",")
+    #                 temp.append(set(info[1:]))
+    #                 if temp[4] == 'set()':
+    #                     while len(temp) > 0:
+    #                         temp[0] = temp[0].lstrip()
+    #                         data[key].append(tuple(temp[:5]))    
+    #                         temp = temp[5:]
+    #                 else:
+    #                     data[key].append(tuple(temp))
+    #     end = time.time()
+    #     print("parsing time", end-start)
+    #     return data
 
     def get_urls(self, data):
         url_nums = []
@@ -178,4 +183,3 @@ class QueryDB(object):
             urls.append(url_data[num])
 
         return urls
-

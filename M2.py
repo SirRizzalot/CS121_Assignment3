@@ -61,10 +61,10 @@ if __name__ ==  "__main__":
         cos_sim_list[doc] = -cos_sim
         #print(f"{doc} : {cos_sim}")
     
-    print("LIST")
+    # print("LIST")
     # sort the cosine similarities score dictionaries
     cos_sim_list = sorturl(cos_sim_list)
-    print(cos_sim_list)
+    # print(cos_sim_list)
     # take the top 5 urls
     if len(cos_sim_list) >= 5:
         top5 = dict(itertools.islice(cos_sim_list.items(), 5))
@@ -76,4 +76,4 @@ if __name__ ==  "__main__":
     for k,v in top5.items():
         print(query1.parent.url_id_to_string[k])  
     end = time.time()
-    print(end - start)
+    print("time", end - start)
