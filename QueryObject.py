@@ -3,6 +3,8 @@ import csv
 import ast
 from itertools import islice
 import time
+import pandas as pd
+
 
 csv.field_size_limit(2**31-1)
 
@@ -95,6 +97,16 @@ class QueryDB(object):
     #     # print(data)
     #     return data
 
+
+    # trying pandas
+    # def load_websitetxt(self, list_of_location):
+    #     start = time.time()
+    #     chunks = pd.read_csv('website_index.csv', chunksize=100000)
+    #     data = pd.concat(chunks)
+    #     end = time.time()
+    #     print("time", end-start)
+    #     print(data)
+
     # function to load information from website_index.csv file
     def load_websitetxt(self, list_of_location):
         data = defaultdict(list)
@@ -113,6 +125,8 @@ class QueryDB(object):
                 try:
                     row = next(reader)
                     key, value = row[0], row[1]
+                    # data[key].append(value)
+                    # break
                     value1 = value[1:-1].replace("'", "").split("}, ")
 
                     for i in value1:
