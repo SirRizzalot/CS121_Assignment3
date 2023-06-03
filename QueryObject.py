@@ -182,7 +182,7 @@ class QueryDB(object):
                 # print("row", row)
 
                 value1 = row[len(word)+3:-4].replace("'", "").split("), ")
-                the_word = row[:len(word)+1]
+                the_word = row[:len(word)]
                 # print("value1", value1)
                 
                 
@@ -194,17 +194,18 @@ class QueryDB(object):
                     word = word[1:]
                     temp = []
                     temp.append(int(word))
-                    if info[1].endswith(")"):
+                    temp.append(float(info[1]))
+                    if info[2].endswith(")"):
                         word = info[1]
                         word = word[:-1]
                         temp.append(float(word))
                     else:
-                        temp.append(float(info[1]))
+                        temp.append(float(info[2]))
                     # print("temp", temp)
                     data[the_word].append(tuple(temp))
         end = time.time()
         print("parsing time", end-start)
-        # print("data", data)
+        print("data", data)
         return data
 
     
