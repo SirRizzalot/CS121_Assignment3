@@ -119,7 +119,7 @@ if __name__ ==  "__main__":
     
     # output the top 5 urls
     for k,v in top5.items():
-        print(query1.parent.url_id_to_string[k])  
+        print(query1.parent.url_id_to_string[k])
     end = time.time()
     print("time", end - start)
     print("time do word_rank", end2 - start2)
