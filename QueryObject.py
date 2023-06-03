@@ -196,11 +196,11 @@ class QueryDB(object):
                     temp.append(int(word))
                     temp.append(float(info[1]))
                     if info[2].endswith(")"):
-                        word = info[1]
+                        word = info[2]
                         word = word[:-1]
-                        temp.append(float(word))
+                        temp.append(int(word))
                     else:
-                        temp.append(float(info[2]))
+                        temp.append(int(info[2]))
                     # print("temp", temp)
                     data[the_word].append(tuple(temp))
         end = time.time()
