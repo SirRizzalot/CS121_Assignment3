@@ -134,29 +134,28 @@ class QueryDB(object):
     #     print("parsing time", end-start)
     #     return data
 
-    # def intersection_term_docs(self, word_list):
-    #     '''get union of all documents in query list'''
-    #     intersection_doc = []
-    #     doc_list = []
-    #     # print("ID ", list(self.id_to_index["query"]))
-    #     invert_index = self.load_tfidf_index(self.get_location(word_list))
-    #     # print(self.word_list)
-    #     for posting in invert_index.values():
-    #         temp_doc = set([doc[0] for doc in posting])
-    #
-    #         doc_list.append(temp_doc)
-    #
-    #     print("or" not in word_list)
-    #     if len(doc_list) != 0 and "or" not in word_list:
-    #         # https://stackoverflow.com/questions/3852780/python-intersection-of-multiple-lists
-    #         intersection_doc = set(doc_list[0]).intersection(*doc_list)
-    #     else:
-    #         or_pos = word_list.index("or")
-    #         if or_pos != 0 and or_pos != len(word_list):
-    #             # print(doc_list)
-    #             union_list = doc_list[or_pos - 1:] + doc_list[:or_pos + 1]
-    #             intersection_doc = set().intersection(*union_list)
-    #     return intersection_doc
+    def intersection_term_docs(self, word_list):
+        '''get union of all documents in query list'''
+        intersection_doc = []
+        doc_list = []
+        # print("ID ", list(self.id_to_index["query"]))
+        invert_index = self.load_tfidf_index(self.get_location(word_list))
+        # print(self.word_list)
+        for posting in invert_index.values():
+            temp_doc = set([doc[0] for doc in posting])
+
+            doc_list.append(temp_doc)
+        and_location = [i for i in range(len(word_list)) if word_list[i] == "and"]
+        if len(doc_list) != 0:
+            prev = 0
+            for location in and_location:
+                union_of_before = set().union(*doc_list[prev:location])
+                prev = location+1
+                intersection_doc.append(union_of_before)
+            union_of_after = set().union(*doc_list[prev:])
+            intersection_doc.append(union_of_after)
+            intersection_doc = set().intersection(*intersection_doc)
+        return intersection_doc
 
     def load_tfidf_index(self, list_of_location):
         data = defaultdict(list)
@@ -317,73 +316,6 @@ class QueryDB(object):
     #     print("parsing time", end-start)
     #     return data
 
-    def intersection_term_docs(self, word_list):
-        '''get union of all documents in query list'''
-        intersection_doc = []
-        doc_list = []
-        # print("ID ", list(self.id_to_index["query"]))
-        invert_index = self.load_websitetxt(self.get_location(word_list))
-        # print(self.word_list)
-        for posting in invert_index.values():
-            temp_doc = set([doc[0] for doc in posting])
-
-            doc_list.append(temp_doc)
-
-        print("or" not in word_list)
-        if len(doc_list) != 0 and "or" not in word_list:
-            # https://stackoverflow.com/questions/3852780/python-intersection-of-multiple-lists
-            intersection_doc = set(doc_list[0]).intersection(*doc_list)
-        else:
-            union_list = []
-            or_pos = word_list.index("or")
-            if or_pos != 0 and or_pos != len(word_list):
-                union_list = doc_list[or_pos - 1] + doc_list[or_pos + 1]
-                doc_list.remove(doc_list[or_pos])
-                doc_list.remove(doc_list[or_pos - 1])
-                doc_list.remove(doc_list[or_pos + 1])
-                intersection_doc = set(union_list).intersection(*doc_list)
-        return intersection_doc
-
-    def load_tfidf_index(self, list_of_location):
-        data = defaultdict(list)
-        start = time.time()
-
-        with open('tfidf_index.csv', newline='') as file: 
-            for word, location in list_of_location:
-                if location == 0:
-                    continue
-                file.seek(location)
-                row = file.readline()
-                # print("row", row)
-
-                value1 = row[len(word)+3:-4].replace("'", "").split("), ")
-                the_word = row[:len(word)]
-                # print("value1", value1)
-                
-                
-                for i in value1:
-                    info = i.split(', ')
-                    # print("info", info)
-                    
-                    word = info[0]
-                    word = word[1:]
-                    temp = []
-                    temp.append(int(word))
-                    temp.append(float(info[1]))
-                    if info[2].endswith(")"):
-                        word = info[2]
-                        word = word[:-1]
-                        temp.append(int(word))
-                    else:
-                        temp.append(int(info[2]))
-                    # print("temp", temp)
-                    data[the_word].append(tuple(temp))
-        end = time.time()
-        print("parsing time", end-start)
-        # print("data", data)
-        return data
-
-    
 
     def load_websitetxt(self, list_of_location):
         data = defaultdict(list)

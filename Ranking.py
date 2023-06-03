@@ -80,13 +80,16 @@ class Ranker:
                 doc_id = int(document[0])  
                 # get tfidf score    
                 score = float(document[1])
-                self.tfidf_score[doc_id] = score
+                self.tfidf_score[doc_id] = -score
                 # get special case score
                 special_freq = int(document[2])   
                 if special_freq > 0:
                     self.special_score[doc_id] = math.log10(special_freq)  
                 else:
                     self.special_score[doc_id] = 0
+        else:
+            self.tfidf_score = {}
+            self.special_score = {}
             
     # def getscore(self):
     #     # check if the word is in the index
