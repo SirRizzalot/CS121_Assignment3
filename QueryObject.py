@@ -47,6 +47,157 @@ class QueryDB(object):
                 key, value = row[0], row[1]
                 data[key] = value
         return data
+    
+    # def seek_position(self, position):
+
+
+    # function to load information from website_index.txt file
+    # def load_websitetxt(self, list_of_location):
+    #     data = defaultdict(list)
+    #     start = time.time()
+    #     # keys = text.split()
+    #     print("list_of_locaiton", list_of_location)
+    #     with open('website_index.txt') as file:
+    #         counter = 1
+
+    #         for word, location in list_of_location:
+    #             if location == 0:
+    #                 continue
+
+    #             loc = 18829411
+    #             file.seek(loc)
+    #             # while counter < location:
+    #             #     file.readline()
+    #             #     counter += 1
+    #             line = file.readline()
+    #             print("line", line)
+    #             break
+    #             counter += 1
+    #             line = line.strip()
+    #             key, value = line.split(': ')
+    #             value1 = value[1:-1].replace("'", "").split(", ")
+    #             for i in value1:
+    #                 info = i.split(",")
+    #                 # print(counter, info)
+    #                 # for x in info:
+    #                     # print(x, type(x))
+                    
+    #                 int_info = [int(x) for x in info]
+    #                 data[key].append(int_info)
+    #     # print(data)
+    #     end = time.time()
+    #     print("total time for here", end-start)
+    #     return data
+
+    # function to load information from website_index.csv file
+    # def load_websitetxt(self, list_of_location):
+    #     data = defaultdict(list)
+    #     print("list", list_of_location)
+    #     start = time.time()
+
+    #     with open('website_index.csv', newline='') as file:
+    #         reader = csv.reader(file)
+    #         for word, location in list_of_location:
+    #             if location == 0:
+    #                 continue
+
+    #             # Move to the desired line using islice
+    #             reader = islice(reader, location - 1, None)
+
+    #             temp = time.time()
+    #             print("iSlice time", temp-start)
+
+    #             try:
+    #                 row = next(reader)
+    #                 key, value = row[0], row[1]
+    #                 data[key].append(value)
+    #                 break
+    #                 value1 = value[1:-1].replace("'", "").split("}, ")
+
+    #                 for i in value1:
+    #                     info = i.split(',{')
+    #                     temp = info[0].split(",")
+    #                     temp.append(set(info[1:]))
+
+    #                     if temp[4] == 'set()':
+    #                         while len(temp) > 0:
+    #                             temp[0] = temp[0].lstrip()
+    #                             data[key].append(tuple(temp[:5]))
+    #                             temp = temp[5:]
+    #                     else:
+    #                         data[key].append(tuple(temp))
+    #             except StopIteration:
+    #                 # Handle the case when there are no more lines to read
+    #                 break
+    #     # print(data)
+    #     end = time.time()
+    #     print("parsing time", end-start)
+    #     return data
+
+    # def intersection_term_docs(self, word_list):
+    #     '''get union of all documents in query list'''
+    #     intersection_doc = []
+    #     doc_list = []
+    #     # print("ID ", list(self.id_to_index["query"]))
+    #     invert_index = self.load_tfidf_index(self.get_location(word_list))
+    #     # print(self.word_list)
+    #     for posting in invert_index.values():
+    #         temp_doc = set([doc[0] for doc in posting])
+    #
+    #         doc_list.append(temp_doc)
+    #
+    #     print("or" not in word_list)
+    #     if len(doc_list) != 0 and "or" not in word_list:
+    #         # https://stackoverflow.com/questions/3852780/python-intersection-of-multiple-lists
+    #         intersection_doc = set(doc_list[0]).intersection(*doc_list)
+    #     else:
+    #         or_pos = word_list.index("or")
+    #         if or_pos != 0 and or_pos != len(word_list):
+    #             # print(doc_list)
+    #             union_list = doc_list[or_pos - 1:] + doc_list[:or_pos + 1]
+    #             intersection_doc = set().intersection(*union_list)
+    #     return intersection_doc
+
+    def load_tfidf_index(self, list_of_location):
+        data = defaultdict(list)
+        start = time.time()
+
+        with open('tfidf_index.csv', newline='') as file: 
+            for word, location in list_of_location:
+                if location == 0:
+                    continue
+                file.seek(location)
+                row = file.readline()
+                # print("row", row)
+
+                value1 = row[len(word)+3:-4].replace("'", "").split("), ")
+                the_word = row[:len(word)]
+                # print("value1", value1)
+                
+                
+                for i in value1:
+                    info = i.split(', ')
+                    # print("info", info)
+                    
+                    word = info[0]
+                    word = word[1:]
+                    temp = []
+                    temp.append(int(word))
+                    temp.append(float(info[1]))
+                    if info[2].endswith(")"):
+                        word = info[2]
+                        word = word[:-1]
+                        temp.append(int(word))
+                    else:
+                        temp.append(int(info[2]))
+                    # print("temp", temp)
+                    data[the_word].append(tuple(temp))
+        end = time.time()
+        print("parsing time", end-start)
+        # print("data", data)
+        return data
+
+    
 
     
     def get_location(self, word_list):

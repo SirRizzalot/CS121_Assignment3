@@ -18,11 +18,12 @@
 import csv
 import os
 import json
+import sys
 from collections import defaultdict
+from itertools import islice
 
 from PartA import tokenizeHTMLString, computeWordPosition, computeWordFrequencies
 import string
-from sys import argv
 import time
 from bs4 import BeautifulSoup
 import lxml
@@ -55,25 +56,18 @@ def write_token_to_file(token, url, frequency):
         file.write(f"{{{url}: {frequency}}}\n")
 
 
-# merge token files
-def merge_files(output_file):
-    #  with open(output_file, "w") as out_file:
-    #      for file in sorted(os.listdir("Tokens"), key=lambda x: x.lower()):
-    #          if file.endswith(".txt"):
-    #              with open(f"Tokens/{file}", "r") as in_file:
-    #                  for line in in_file:
-    #                      out_file.write(line)
-    #              os.remove(f"Tokens/{file}")
-    lines = []
 
-    for file in sorted(os.listdir("Tokens"), key=lambda x: x.lower()):
-        if file.endswith(".txt"):
-            with open(f"Tokens/{file}", "r") as in_file:
-                lines.extend(in_file.readlines())
-            os.remove(f"Tokens/{file}")
 
-    with open(output_file, "w", buffering=8192) as out_file:
-        out_file.writelines(lines)
+def count_json_files(folder_path):
+    count = 0
+
+    # Traverse the directory tree using os.walk()
+    for root, dirs, files in os.walk(folder_path):
+        for filename in files:
+            if filename.endswith('.json'):
+                count += 1
+
+    return count
 
 
 def file_parser(main_folder):
@@ -82,271 +76,22 @@ def file_parser(main_folder):
     word_url = defaultdict(list)
     url_no = 0
     document_count = 0
-    line_no = 0 #track line number of word on website_index.txt after writing to it
-    word_line = dict() # map word with its line_no
+    word_locator = defaultdict(lambda: [-1, -1, -1])  # map word with its line_no
 
-    important_text = dict()
-
-    # read the main folder and loop through all the sub folders
-    for folder in os.listdir(main_folder):
-        print(folder)
-        # merges the path
-        folder = os.path.join(main_folder, folder)
-        # read the sub folder and loop through all the files
-        if(folder.endswith(".DS_Store")):
-            continue
-        for file in os.listdir(folder):
-            # checks the file has a json extension
-            try:
-                if file.endswith(".json"):
-                    with open(os.path.join(folder, file), "r") as f:
-                        data = json.load(f)
-                        # call function to add the url to a file
-                        
-                        #content parsing - extract html tags
-                        # CLEANR = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
-                        # words = re.sub(CLEANR, ' ', data["content"])
-                        words = BeautifulSoup(data["content"], "lxml").text
-                        
-                        words_list = tokenizeHTMLString(words)
-                        frequencies = computeWordFrequencies(words_list)
-
-                        # hash the url
-                        # url_id = hash(data["url"])
-                        # add the url to the id dictionary
-                        url_ids[url_no] = data["url"]
-
-                        
-                        # getting important text from content
-                        soup = BeautifulSoup(data["content"], 'lxml')
-                        tags = ['b', 'strong', 'h1', 'h2', 'h3', 'title']
-                        special_case = [tag.text for tag in soup.find_all(tags)]
-                        special_case_list = tokenizeHTMLString(" ".join(special_case))
-                        special_case_frequencies = computeWordFrequencies(special_case_list)
-
-                        url_info = urlWordInfo()
-                        for word, frequency in frequencies.items():
-                            url_info.addWordInfo(word, ["regular", frequency])
-
-                        for word, frequency in special_case_frequencies.items():
-                            url_info.addWordInfo(word, ["special_case", frequency])
-
-                        for word, info in url_info.getWordInfo().items():
-                            organized_info = ""
-                            position = set()
-                            for i in range(len(words_list)):
-                                if words_list[i] == word:
-                                    position.add(i)
-                            if len(info) > 1:
-                                organized_info += f"{url_no},{info[0][1]},{info[1][1]}, {len(words_list)}, {position}"
-                            else:
-                                organized_info += f"{url_no},{info[0][1]},0,{len(words_list)}, {position}"
-                            unique_word.add(word)
-                            word_url[word].append(organized_info)
-
-                            # linecache.clearcache()
-                        # print(url_no)
-                        # for word in frequencies:
-                        #    if word not in word_locations:
-                        #       word_locations[word] = line
-                        #       #index.write(word + ": " + data["url"] + "\n")
-                        #       index.write(f"{word} : {{{data['url']}, {frequencies[word]}}}\n")
-                        #       line += 1
-                        #    else:
-                        #       current_line = 0
-
-                        #       while current_line != word_locations[word]:
-                        #          #current_line_info = index.readline().strip()
-                        #          current_line+=1
-
-                        #       current_line_info = linecache.getline(r"website_index.txt", current_line)
-                        #       print(word + ": " + str(current_line))
-                        #       print(current_line_info)
-                        #       #current_line_info = index.readline()
-                        #       # putting urls with the same word into the same line.
-                        #       # 1st idea is to add to the end of the line we find it with
-                        #       # 2nd idea is to create a lot of text files each with a word then merge it at the end haha
-
-                        #       word_locations[word] = line
-                        #       print(data["url"])
-                        #       index.write(f"{current_line_info.strip()}, {{{data['url']}, {frequencies[word]}}}\n")
-                        #       #index.write(f"{word} : ({data['url']}, {frequencies[word]})\n")
-                        #       line += 1
-                        #       linecache.clearcache()
-
-                    f.close()
-                    document_count += 1
-                    url_no += 1
-            except json.JSONDecodeError as e:
-                print(f"File {file} is not a valid json file")
-                continue
-    with open("index/website_index.csv", "w", encoding='utf-8', newline='') as f,\
-            open("index/word_index_locator.csv", "w", encoding='utf-8', newline='') as t:
-        writer_f = csv.writer(f)
-        writer_t = csv.writer(t)
-        line_no = 0
-        for word, details in sorted(word_url.items()):
-            line_no += 1
-            writer_f.writerow([word, details])
-            writer_t.writerow([word, line_no])
-    f.close()
-    t.close()
-    with open("index/url_ids.csv", "w", encoding='utf-8', newline='') as f:
-        writer_f = csv.writer(f)
-        for id, url in url_ids.items():
-            writer_f.writerow([id, url])
-    f.close()
-    with open("index/count.txt", "w") as f:
-        f.write(str(document_count))
-    f.close()
-    #print(word_line)
-
-
-def file_parser2(main_folder):
-    unique_word = set()
-    url_ids = dict()
-    word_url = defaultdict(list)
-    url_no = 0
-    document_count = 0
-    line_no = 0  # track line number of word on website_index.txt after writing to it
-    word_line = dict()  # map word with its line_no
-
-    important_text = dict()
+    total_count_file = count_json_files(main_folder)
+    first_second_stop = int(total_count_file / 3)
+    split_count = 0
+    print(first_second_stop)
 
     # read the main folder and loop through all the sub folders
     for folder in os.listdir(main_folder):
-        print(folder)
-        # merges the path
-        folder = os.path.join(main_folder, folder)
-        # read the sub folder and loop through all the files
-        if (folder.endswith(".DS_Store")):
-            continue
-        for file in os.listdir(folder):
-            # checks the file has a json extension
-            try:
-                if file.endswith(".json"):
-                    with open(os.path.join(folder, file), "r") as f:
-                        data = json.load(f)
-                        # call function to add the url to a file
-
-                        # content parsing - extract html tags
-                        # CLEANR = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
-                        # words = re.sub(CLEANR, ' ', data["content"])
-                        words = BeautifulSoup(data["content"], "lxml").text
-
-                        words_list = tokenizeHTMLString(words)
-                        frequencies = computeWordFrequencies(words_list)
-
-                        # hash the url
-                        # url_id = hash(data["url"])
-                        # add the url to the id dictionary
-                        url_ids[url_no] = data["url"]
-
-                        # getting important text from content
-                        soup = BeautifulSoup(data["content"], 'lxml')
-                        tags = ['b', 'strong', 'h1', 'h2', 'h3', 'title']
-                        special_case = [tag.text for tag in soup.find_all(tags)]
-                        special_case_list = tokenizeHTMLString(" ".join(special_case))
-                        special_case_frequencies = computeWordFrequencies(special_case_list)
-
-                        url_info = urlWordInfo()
-                        for word, frequency in frequencies.items():
-                            url_info.addWordInfo(word, ["regular", frequency])
-
-                        for word, frequency in special_case_frequencies.items():
-                            url_info.addWordInfo(word, ["special_case", frequency])
-
-                        for word, info in url_info.getWordInfo().items():
-                            organized_info = ""
-                            position = set()
-                            for i in range(len(words_list)):
-                                if words_list[i] == word:
-                                    position.add(i)
-                            if len(info) > 1:
-                                organized_info += f"{url_no},{info[0][1]},{info[1][1]}, {len(words_list)}, {position}"
-                            else:
-                                organized_info += f"{url_no},{info[0][1]},0,{len(words_list)}, {position}"
-                            unique_word.add(word)
-                            word_url[word].append(organized_info)
-
-                            # linecache.clearcache()
-                        # print(url_no)
-                        # for word in frequencies:
-                        #    if word not in word_locations:
-                        #       word_locations[word] = line
-                        #       #index.write(word + ": " + data["url"] + "\n")
-                        #       index.write(f"{word} : {{{data['url']}, {frequencies[word]}}}\n")
-                        #       line += 1
-                        #    else:
-                        #       current_line = 0
-
-                        #       while current_line != word_locations[word]:
-                        #          #current_line_info = index.readline().strip()
-                        #          current_line+=1
-
-                        #       current_line_info = linecache.getline(r"website_index.txt", current_line)
-                        #       print(word + ": " + str(current_line))
-                        #       print(current_line_info)
-                        #       #current_line_info = index.readline()
-                        #       # putting urls with the same word into the same line.
-                        #       # 1st idea is to add to the end of the line we find it with
-                        #       # 2nd idea is to create a lot of text files each with a word then merge it at the end haha
-
-                        #       word_locations[word] = line
-                        #       print(data["url"])
-                        #       index.write(f"{current_line_info.strip()}, {{{data['url']}, {frequencies[word]}}}\n")
-                        #       #index.write(f"{word} : ({data['url']}, {frequencies[word]})\n")
-                        #       line += 1
-                        #       linecache.clearcache()
-
-                    f.close()
-                    document_count += 1
-                    url_no += 1
-            except json.JSONDecodeError as e:
-                print(f"File {file} is not a valid json file")
-                continue
-    with open("index/website_index2.csv", "w", encoding='utf-8', newline='') as f, \
-            open("index/word_index_locator2.csv", "w", encoding='utf-8', newline='') as t:
-        writer_f = csv.writer(f)
-        writer_t = csv.writer(t)
-        line_no = 0
-        for word, details in sorted(word_url.items()):
-            line_no += 1
-            writer_f.writerow([word, details])
-            writer_t.writerow([word, line_no])
-    f.close()
-    t.close()
-    with open("index/url_ids2.csv", "w", encoding='utf-8', newline='') as f:
-        writer_f = csv.writer(f)
-        for id, url in url_ids.items():
-            writer_f.writerow([id, url])
-    f.close()
-    with open("index/count2.txt", "w") as f:
-        f.write(str(document_count))
-    f.close()
-    # print(word_line)
-
-
-def file_parser3(main_folder):
-    unique_word = set()
-    url_ids = dict()
-    word_url = defaultdict(list)
-    url_no = 0
-    document_count = 0
-    line_no = 0  # track line number of word on website_index.txt after writing to it
-    word_line = dict()  # map word with its line_no
-
-    important_text = dict()
-
-    # read the main folder and loop through all the sub folders
-    for folder in os.listdir(main_folder):
-        print(folder)
+        # print(folder)
         # merges the path
         folder = os.path.join(main_folder, folder)
         # read the sub folder and loop through all the files
         for file in os.listdir(folder):
             # checks the file has a json extension
-            print(file)
+            # print(file)
             try:
                 if file.endswith(".json"):
                     with open(os.path.join(folder, file), "r") as f:
@@ -392,35 +137,33 @@ def file_parser3(main_folder):
                             unique_word.add(word)
                             word_url[word].append(organized_info)
 
-                            # linecache.clearcache()
-                        # print(url_no)
-                        # for word in frequencies:
-                        #    if word not in word_locations:
-                        #       word_locations[word] = line
-                        #       #index.write(word + ": " + data["url"] + "\n")
-                        #       index.write(f"{word} : {{{data['url']}, {frequencies[word]}}}\n")
-                        #       line += 1
-                        #    else:
-                        #       current_line = 0
 
-                        #       while current_line != word_locations[word]:
-                        #          #current_line_info = index.readline().strip()
-                        #          current_line+=1
+                        # splitter
+                        if split_count < 2:
+                            if document_count / first_second_stop > 0 and document_count % first_second_stop == 0:
+                                split_count += 1
+                                with open(f"website_index_{split_count}.csv", "w", encoding='utf-8', newline='') as index:
+                                    writer_index = csv.writer(index)
+                                    line_no = 0
+                                    for word, details in sorted(word_url.items()):
+                                        line_no += 1
+                                        writer_index.writerow([word, details])
+                                        word_locator[word][split_count-1] = line_no
+                                index.close()
+                                word_url.clear()
 
-                        #       current_line_info = linecache.getline(r"website_index.txt", current_line)
-                        #       print(word + ": " + str(current_line))
-                        #       print(current_line_info)
-                        #       #current_line_info = index.readline()
-                        #       # putting urls with the same word into the same line.
-                        #       # 1st idea is to add to the end of the line we find it with
-                        #       # 2nd idea is to create a lot of text files each with a word then merge it at the end haha
-
-                        #       word_locations[word] = line
-                        #       print(data["url"])
-                        #       index.write(f"{current_line_info.strip()}, {{{data['url']}, {frequencies[word]}}}\n")
-                        #       #index.write(f"{word} : ({data['url']}, {frequencies[word]})\n")
-                        #       line += 1
-                        #       linecache.clearcache()
+                        elif split_count == 2:
+                            if document_count == total_count_file:
+                                split_count += 1
+                                with open(f"website_index_{split_count}.csv", "w", encoding='utf-8', newline='') as index:
+                                    writer_index = csv.writer(index)
+                                    line_no = 0
+                                    for word, details in sorted(word_url.items()):
+                                        line_no += 1
+                                        writer_index.writerow([word, details])
+                                        word_locator[word][split_count-1] = line_no
+                                index.close()
+                                word_url.clear()
 
                     f.close()
                     document_count += 1
@@ -428,45 +171,177 @@ def file_parser3(main_folder):
             except json.JSONDecodeError as e:
                 print(f"File {file} is not a valid json file")
                 continue
-    with open("website_index3.csv", "w", encoding='utf-8', newline='') as f, \
-            open("word_index_locator3.csv", "w", encoding='utf-8', newline='') as t:
-        writer_f = csv.writer(f)
+
+    with open("word_index_locator.csv", "w", encoding='utf-8', newline='') as t:
         writer_t = csv.writer(t)
-        line_no = 0
-        for word, details in sorted(word_url.items()):
-            line_no += 1
-            writer_f.writerow([word, details])
-            writer_t.writerow([word, line_no])
-    f.close()
+        for word, details in sorted(word_locator.items()):
+            writer_t.writerow([word, details])
     t.close()
-    with open("url_ids3.csv", "w", encoding='utf-8', newline='') as f:
+
+    csv.field_size_limit(100000000)
+    with open(f"website_index.csv", "w", encoding='utf-8', newline='') as full_index, \
+            open(f"website_index_0.csv", "r", encoding='utf-8', newline='') as index1, \
+            open(f"website_index_1.csv", "r", encoding='utf-8', newline='') as index2, \
+            open(f"website_index_2.csv", "r", encoding='utf-8', newline='') as index3:
+        writer_index = csv.writer(full_index)
+
+        index1_reader = csv.reader(index1)
+        index2_reader = csv.reader(index2)
+        index3_reader = csv.reader(index3)
+        word1 = "0"
+        word2 = "0"
+        word3 = "0"
+        value1 = eval(next(index1_reader)[1])
+        value2 = eval(next(index2_reader)[1])
+        value3 = eval(next(index3_reader)[1])
+        value1_done = False
+        value2_done = False
+        value3_done = False
+
+        for word, details in sorted(word_locator.items()):
+
+            all_values = set()
+
+            try:
+                # Iterate through each line in the CSV file
+                while word1 < word and not value1_done:
+                    nextLine1 = next(index1_reader)
+                    word1 = eval(nextLine1[0])
+                    value1 = eval(nextLine1[1])
+                if word1 == word:
+                    for url in value1:
+                        all_values.add(url)
+            except StopIteration:
+                value1_done = True
+
+            try:
+                # Iterate through each line in the CSV file
+                while word2 < word and not value2_done:
+                    nextLine2 = next(index2_reader)
+                    word2 = nextLine2[0]
+                    value2 = eval(nextLine2[1])
+                if word2 == word:
+                    for url in value2:
+                        all_values.add(url)
+            except StopIteration:
+                value2_done = True
+
+            try:
+                # Iterate through each line in the CSV file
+                while word3 < word and not value3_done:
+                    nextLine3 = next(index3_reader)
+                    word3 = nextLine3[0]
+                    value3 = eval(nextLine3[1])
+                if word3 == word:
+                    for url in value3:
+                        all_values.add(url)
+            except StopIteration:
+                value3_done = True
+
+            writer_index.writerow([word, all_values])
+    full_index.close()
+    index1.close()
+    index2.close()
+    index3.close()
+
+    with open("url_ids.csv", "w", encoding='utf-8', newline='') as f:
         writer_f = csv.writer(f)
         for id, url in url_ids.items():
             writer_f.writerow([id, url])
     f.close()
-    with open("count3.txt", "w") as f:
+    with open("count.txt", "w") as f:
         f.write(str(document_count))
     f.close()
     # print(word_line)
 
+
+
+# merge token files
+def merge_files(locator):
+    #  with open(output_file, "w") as out_file:
+    #      for file in sorted(os.listdir("Tokens"), key=lambda x: x.lower()):
+    #          if file.endswith(".txt"):
+    #              with open(f"Tokens/{file}", "r") as in_file:
+    #                  for line in in_file:
+    #                      out_file.write(line)
+    #              os.remove(f"Tokens/{file}")
+    lines = []
+    csv.field_size_limit(100000000)
+    with open(locator) as locator_file, open(f"website_index.csv", "w", encoding='utf-8', newline='') as full_index, \
+        open(f"website_index_1.csv", "r", encoding='utf-8', newline='') as index2, \
+        open(f"website_index_2.csv", "r", encoding='utf-8', newline='') as index3:
+        writer_index = csv.writer(full_index)
+
+
+        locator = csv.reader(locator_file)
+        # index1_reader = csv.reader(index1)
+        index2_reader = csv.reader(index2)
+        index3_reader = csv.reader(index3)
+        # word1 = "0"
+        word2 = "0"
+        word3 = "0"
+        # value1 = eval(next(index1_reader)[1])
+        value2 = eval(next(index2_reader)[1])
+        value3 = eval(next(index3_reader)[1])
+        # value1_done = False
+        value2_done = False
+        value3_done = False
+
+
+        for line in locator:
+
+            # Extract values from the line
+            word = line[0]
+            all_values = set()
+
+            # try:
+            #     # Iterate through each line in the CSV file
+            #     while word1 < word and not value1_done:
+            #         nextLine1 = next(index1_reader)
+            #         word1 = eval(nextLine1[0])
+            #         value1 = eval(nextLine1[1])
+            #     if word1 == word:
+            #         for url in value1:
+            #             all_values.add(url)
+            # except StopIteration:
+            #     value1_done = True
+
+            try:
+                # Iterate through each line in the CSV file
+                while word2 < word and not value2_done:
+                    nextLine2 = next(index2_reader)
+                    word2 = nextLine2[0]
+                    value2 = eval(nextLine2[1])
+                if word2 == word:
+                    for url in value2:
+                        all_values.add(url)
+            except StopIteration:
+                value2_done = True
+
+            try:
+                # Iterate through each line in the CSV file
+                while word3 < word and not value3_done:
+                    nextLine3 = next(index3_reader)
+                    word3 = nextLine3[0]
+                    value3 = eval(nextLine3[1])
+                if word3 == word:
+                    for url in value3:
+                        all_values.add(url)
+            except StopIteration:
+                value3_done = True
+
+
+            writer_index.writerow([word, all_values])
+
+
+
 if __name__ == "__main__":
-   #  file_parser("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/ANALYST")
-   #  file_parser("C:/Users/Anthony Wen/Downloads/CS121_Assignment3/analyst/ANALYST")
+
     print(f"starting at: {start_time}")
-   # Create threads for each file path
-   #  thread1 = threading.Thread(target=file_parser, args=("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/DEV",))
-   #  thread2 = threading.Thread(target=file_parser2, args=("/Users/lanceli/Downloads/inlab3/cs121/CS121_Assignment3/",))
-    thread3 = threading.Thread(target=file_parser3, args=("C:/Users/Lilan/Documents/CS121_Assignment3/DEV",))
+    # print(count_json_files("C:/Users/Lilan/Documents/CS121_Assignment3/DEV"))
+    file_parser("C:/Users/Lilan/Documents/CS121_Assignment3/DEV")
+    merge_files("word_index_locator.csv")
 
-    # Start the threads
-    # thread1.start()
-    # thread2.start()
-    thread3.start()
-
-    # Wait for the threads to finish
-    # thread1.join()
-    # thread2.join()
-    thread3.join()
 
 
     print("--- %s seconds ---" % (time.time() - start_time))
