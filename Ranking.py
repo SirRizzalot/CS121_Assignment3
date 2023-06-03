@@ -74,15 +74,23 @@ class Ranker:
     #     else:
     #         # if word is not in the index, self.tfidf score of the word will be 0
     #         self.tfidf_score = 0
-    def getTFIDF(self):
+    def getScore(self):
         if self.word in self.word_info:
             for document in self.posting:
-                doc_id = int(document[0])      
+                doc_id = int(document[0])  
+                # get tfidf score    
                 score = float(document[1])
-                self.tfidf_score[doc_id] = -score     
+                self.tfidf_score[doc_id] = -score  
+                # get special case score
+                special_freq = int(document[2])   
+                if special_freq > 0:
+                    self.special_score[doc_id] = math.log10(special_freq)  
+                else:
+                    self.special_score[doc_id] = 0
         else:
             # if word is not in the index, self.tfidf score of the word will be 0
             self.tfidf_score = 0
+            self.special_score = 0
             
     # def getscore(self):
     #     # check if the word is in the index
@@ -120,7 +128,6 @@ class Ranker:
     #             else:
     #                 special_score = 0
     #             self.special_score[doc_id] = special_score
-        
      
 #sort the urls by score
 def sorturl(dict):

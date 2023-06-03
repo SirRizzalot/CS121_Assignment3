@@ -25,6 +25,7 @@ if __name__ ==  "__main__":
     # }
     start = time.time()
     score_list = {}  # tfidf scores
+    special_score_list = {} # special case scores
     #dictionary format of score of words in query for all urls having them
     # {
     #     url1: {score_w1, score_w2, score_w3},
@@ -37,22 +38,33 @@ if __name__ ==  "__main__":
     start2 = time.time()
     for word in query1.query:
         word_rank = Ranker(word, query1)
-        # get tfidf score
-        word_rank.getTFIDF()
+        # get tfidf score and special case score
+        word_rank.getScore()
         score_list[word] = word_rank.tfidf_score
+        special_score_list[word] = word_rank.special_score
         
         # make top_score_list and top_special_score_list to get top urls with highest score     
-        if len(score_list[word]) >= 20:
+        if len(score_list[word]) >= 10:
             sorted_dict = dict(sorted(score_list[word].items(), key=lambda x: x[1], reverse=True))
-            top_score_list = dict(list(sorted_dict.items())[:20])
+            top_score_list = dict(list(sorted_dict.items())[:10])
         else:
             top_score_list = score_list[word]
-            
+        
+        if len(special_score_list[word]) >= 10:
+            sorted_dict = dict(sorted(special_score_list[word].items(), key=lambda x: x[1], reverse=True))
+            top_special_score_list = dict(list(sorted_dict.items())[:10])
+        else:
+            top_special_score_list = special_score_list[word] 
+               
         #make top_urls to combine top_score_list and top_special_score_list
         for url, score in top_score_list.items():
             top_urls[url] = score
                 
+        for url, score in top_special_score_list.items():
+            if url not in top_urls:
+                top_urls[url] = score
         
+        # formal top_urls to all_doc_vector to calculate cosine similarity        
         for url in top_urls:
             if url in all_doc_vector:
                 all_doc_vector[url].append(top_urls[url])
@@ -85,7 +97,12 @@ if __name__ ==  "__main__":
         cos_sim = compute_cosine_similarities(query_score, all_doc_vector[doc])
         cos_sim_list[doc] = cos_sim
     end4 = time.time()
-      
+    
+    # add special word cases to score after calculating cosine similarities   
+    for word in special_score_list:
+        for url, special_score in special_score_list[word].items():
+            if url in top_urls:
+                cos_sim_list[url] += special_score    
        
     start6 = time.time() 
     # sort the cosine similarities score dictionaries
