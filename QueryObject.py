@@ -205,7 +205,7 @@ class QueryDB(object):
                     data[the_word].append(tuple(temp))
         end = time.time()
         print("parsing time", end-start)
-        # print("data", data)
+        print("data", data)
         return data
 
     
