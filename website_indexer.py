@@ -16,6 +16,7 @@
 # Lance Li lancekl, 90653176
 ######################################################################################################################
 import csv
+import math
 import os
 import json
 import sys
@@ -92,6 +93,7 @@ def file_parser(main_folder):
         for file in os.listdir(folder):
             # checks the file has a json extension
             # print(file)
+            document_count += 1
             try:
                 if file.endswith(".json"):
                     with open(os.path.join(folder, file), "r") as f:
@@ -104,7 +106,7 @@ def file_parser(main_folder):
                         words = BeautifulSoup(data["content"], "lxml").text
 
                         words_list = tokenizeHTMLString(words)
-                        position = computeWordPosition(words_list)
+                        word_frequency = computeWordFrequencies(words_list)
 
                         # hash the url
                         # url_id = hash(data["url"])
@@ -119,21 +121,20 @@ def file_parser(main_folder):
                         special_case_frequencies = computeWordFrequencies(special_case_list)
 
                         url_info = urlWordInfo()
-                        for word, frequency in position.items():
-                            url_info.addWordInfo(word, ["regular", len(frequency), frequency])
+                        for word, frequency in word_frequency.items():
+                            url_info.addWordInfo(word, ["regular", frequency])
 
                         for word, frequency in special_case_frequencies.items():
                             if word not in url_info.getWordInfo():
-                                url_info.addWordInfo(word, ["regular", 0, set()])
+                                url_info.addWordInfo(word, ["regular", 0])
                             url_info.addWordInfo(word, ["special_case", frequency])
                         for word, info in url_info.getWordInfo().items():
 
                             organized_info = ""
                             if len(info) > 1:
-                                organized_info += f"{url_no},{info[0][1]},{info[1][1]},{len(words_list)},{info[0][2]}"
+                                organized_info += f"{url_no},{info[0][1]},{info[1][1]},{len(words_list)}"
                             else:
-
-                                organized_info += f"{url_no},{info[0][1]},0,{len(words_list)},{info[0][2]}"
+                                organized_info += f"{url_no},{info[0][1]},0,{len(words_list)}"
                             unique_word.add(word)
                             word_url[word].append(organized_info)
 
@@ -141,6 +142,7 @@ def file_parser(main_folder):
                         # splitter
                         if split_count < 2:
                             if document_count / first_second_stop > 0 and document_count % first_second_stop == 0:
+                                print("triggered)")
                                 split_count += 1
                                 with open(f"website_index_{split_count}.csv", "w", encoding='utf-8', newline='') as index:
                                     writer_index = csv.writer(index)
@@ -154,6 +156,7 @@ def file_parser(main_folder):
 
                         elif split_count == 2:
                             if document_count == total_count_file:
+                                print("triggered)")
                                 split_count += 1
                                 with open(f"website_index_{split_count}.csv", "w", encoding='utf-8', newline='') as index:
                                     writer_index = csv.writer(index)
@@ -166,25 +169,27 @@ def file_parser(main_folder):
                                 word_url.clear()
 
                     f.close()
-                    document_count += 1
+
                     url_no += 1
+                    print(document_count)
             except json.JSONDecodeError as e:
                 print(f"File {file} is not a valid json file")
                 continue
 
-    with open("word_index_locator.csv", "w", encoding='utf-8', newline='') as t:
-        writer_t = csv.writer(t)
-        for word, details in sorted(word_locator.items()):
-            writer_t.writerow([word, details])
-    t.close()
+    # with open("word_index_locator.csv", "w", encoding='utf-8', newline='') as t:
+    #     writer_t = csv.writer(t)
+    #     for word, details in sorted(word_locator.items()):
+    #         writer_t.writerow([word, details])
+    # t.close()
 
     csv.field_size_limit(100000000)
     with open(f"website_index.csv", "w", encoding='utf-8', newline='') as full_index, \
-            open(f"website_index_0.csv", "r", encoding='utf-8', newline='') as index1, \
-            open(f"website_index_1.csv", "r", encoding='utf-8', newline='') as index2, \
-            open(f"website_index_2.csv", "r", encoding='utf-8', newline='') as index3:
+            open(f"website_index_1.csv", "r", encoding='utf-8', newline='') as index1, \
+            open(f"website_index_2.csv", "r", encoding='utf-8', newline='') as index2, \
+            open(f"website_index_3.csv", "r", encoding='utf-8', newline='') as index3, \
+            open("word_index_locator.csv", "w", encoding='utf-8', newline='') as t:
         writer_index = csv.writer(full_index)
-
+        writer_t = csv.writer(t)
         index1_reader = csv.reader(index1)
         index2_reader = csv.reader(index2)
         index3_reader = csv.reader(index3)
@@ -199,14 +204,14 @@ def file_parser(main_folder):
         value3_done = False
 
         for word, details in sorted(word_locator.items()):
-
+            writer_t.writerow([word, full_index.tell()])
             all_values = set()
 
             try:
                 # Iterate through each line in the CSV file
                 while word1 < word and not value1_done:
                     nextLine1 = next(index1_reader)
-                    word1 = eval(nextLine1[0])
+                    word1 = nextLine1[0]
                     value1 = eval(nextLine1[1])
                 if word1 == word:
                     for url in value1:
@@ -253,6 +258,32 @@ def file_parser(main_folder):
         f.write(str(document_count))
     f.close()
     # print(word_line)
+
+def tfidfIndex():
+    with open("word_index_locator.csv", "r", encoding='utf-8', newline='') as locator, \
+            open(f"website_index.csv", "r", encoding='utf-8', newline='') as full_index, \
+                open(f"count.txt", "r", encoding='utf-8', newline='') as count, \
+                    open("tfidf_index.csv", "w", encoding='utf-8', newline='') as tfidf_index, \
+                        open("tfidf_index_locator.csv", "w", encoding='utf-8', newline='') as tfidf_locator:
+        total_count = int(count.readline())
+        writer_tfidf_index = csv.writer(tfidf_index)
+        writer_tfidf_index_locator = csv.writer(tfidf_locator)
+        location = 0
+        for line in locator:
+            word = line.split(",")[0]
+            location = int(line.split(",")[1])
+            writer_tfidf_index_locator.writerow([word, tfidf_index.tell()])
+            full_index.seek(location)
+            row = full_index.readline()
+            value1 = row[len(word) + 3:-3].replace("}", "").split(", ")
+            document_frequency = len(value1)
+            new_data_set = list()
+            for i in value1:
+                info = i.replace("\'", "").split(',')
+                tfidf = (1 + math.log10((int(info[1]) + int(info[2]))/(int(info[3]) + int(info[2])))) * math.log10(total_count/document_frequency)
+                new_data_set.append((info[0], tfidf, info[2]))
+            new_data_set.sort(key=lambda x: (x[1], x[2]), reverse=True)
+            writer_tfidf_index.writerow([word, new_data_set])
 
 
 
@@ -341,6 +372,7 @@ if __name__ == "__main__":
     # print(count_json_files("C:/Users/Lilan/Documents/CS121_Assignment3/DEV"))
     file_parser("C:/Users/Lilan/Documents/CS121_Assignment3/DEV")
     # merge_files("word_index_locator.csv")
+    tfidfIndex()
 
 
 
