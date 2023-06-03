@@ -72,8 +72,6 @@ if __name__ ==  "__main__":
                 all_doc_vector[url] = []
                 all_doc_vector[url].append(top_urls[url])
 
-    better_url_list = QueryDB.intersection_term_docs(query1.query)
-
     end2 = time.time()
     
     start3 = time.time()
