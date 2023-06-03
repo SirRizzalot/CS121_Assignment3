@@ -82,7 +82,7 @@ if __name__ ==  "__main__":
     cos_sim_list = {}    
     count = 0
     for doc in top_urls:
-        print(count)
+        # print(count)
         count += 1
         cos_sim = compute_cosine_similarities(query_score, all_doc_vector[doc])
         cos_sim_list[doc] = cos_sim
