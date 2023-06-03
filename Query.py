@@ -22,31 +22,31 @@ class Query(object):
     def querying(self):
         stem = PorterStemmer()
         find = True
-        #while find:
+        while find:
 
-        self.query = input("what do you want to search? enter quit to quit\n").lower().split()
-        # if " ".join(self.query) == "quit":
-        #     find = False
-        #     break
-        self.query = [stem.stem(i) for i in self.query]
-        ordered = sorted(self.parent.get_location(self.query), key=lambda x: x[1])
-        #print(ordered)
+            self.query = input("what do you want to search? enter quit to quit\n").lower().split()
+            if " ".join(self.query) == "quit":
+                find = False
+                break
+            self.query = [stem.stem(i) for i in self.query]
+            ordered = sorted(self.parent.get_location(self.query), key=lambda x: x[1])
+            #print(ordered)
 
-        self.no_show = {i for i in ordered if i[1] == 0}
-        #print(self.no_show)
-        
-        start = time.time()
-        # self.word_info = self.parent.load_websitetxt(ordered)
-        self.word_info = self.parent.load_tfidf_index(ordered)
-        end = time.time()
-        print("loading word_site.csv", end - start)
-        #print(self.word_info)
-        #print(self.word_info.items())
-        # score_list = {}
-        # for word in self.query:
-        #     word_rank = Ranker(word, self)
-        #     word_rank.getScore()
-        #     score_list[word] = word_rank.score
+            self.no_show = {i for i in ordered if i[1] == 0}
+            #print(self.no_show)
+            
+            start = time.time()
+            # self.word_info = self.parent.load_websitetxt(ordered)
+            self.word_info = self.parent.load_tfidf_index(ordered)
+            end = time.time()
+            print("loading word_site.csv", end - start)
+            #print(self.word_info)
+            #print(self.word_info.items())
+            # score_list = {}
+            # for word in self.query:
+            #     word_rank = Ranker(word, self)
+            #     word_rank.getScore()
+            #     score_list[word] = word_rank.score
 
 
     def generate_ngrams(self,sentence):
