@@ -121,9 +121,6 @@ class QueryDB(object):
     #     print("total time for here", end-start)
     #     return data
 
-
-   
-
     # function to load information from website_index.csv file
     # def load_websitetxt(self, list_of_location):
     #     data = defaultdict(list)
@@ -168,6 +165,33 @@ class QueryDB(object):
     #     end = time.time()
     #     print("parsing time", end-start)
     #     return data
+
+    def intersection_term_docs(self, word_list):
+        '''get union of all documents in query list'''
+        intersection_doc = []
+        doc_list = []
+        # print("ID ", list(self.id_to_index["query"]))
+        invert_index = self.load_websitetxt(self.get_location(word_list))
+        # print(self.word_list)
+        for posting in invert_index.values():
+            temp_doc = set([doc[0] for doc in posting])
+
+            doc_list.append(temp_doc)
+
+        print("or" not in word_list)
+        if len(doc_list) != 0 and "or" not in word_list:
+            # https://stackoverflow.com/questions/3852780/python-intersection-of-multiple-lists
+            intersection_doc = set(doc_list[0]).intersection(*doc_list)
+        else:
+            union_list = []
+            or_pos = word_list.index("or")
+            if or_pos != 0 and or_pos != len(word_list):
+                union_list = doc_list[or_pos - 1] + doc_list[or_pos + 1]
+                doc_list.remove(doc_list[or_pos])
+                doc_list.remove(doc_list[or_pos - 1])
+                doc_list.remove(doc_list[or_pos + 1])
+                intersection_doc = set(union_list).intersection(*doc_list)
+        return intersection_doc
 
     def load_tfidf_index(self, list_of_location):
         data = defaultdict(list)
